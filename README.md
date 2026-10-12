@@ -94,7 +94,7 @@ On Render (Web Service), Railway, a VPS, etc.:
   Edit `client/vercel.json` and replace `YOUR-API-DOMAIN` with your API address. Leave `REACT_APP_API_URL` empty.
 - Netlify: base directory `client`, build `npm run build`, publish `client/build`. `public/_redirects` handles page refreshes.
   Add a redirect for `/api/*` and `/uploads/*` to your API, or set `REACT_APP_API_URL=https://your-api/api`.
-- Lint warnings never fail the build (`client/.env` sets `DISABLE_ESLINT_PLUGIN=true`).
+- The production build disables the ESLint webpack plugin (`client/.env.production` sets `DISABLE_ESLINT_PLUGIN=true`); local development lint remains enabled.
 
 ### Always
 
