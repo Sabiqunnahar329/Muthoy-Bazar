@@ -89,6 +89,7 @@ On Render (Web Service), Railway, a VPS, etc.:
 - Start command: `npm start`
 - Environment variables: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your site address), `NODE_ENV=production`, `TRUST_PROXY=1`
 - Leave `REACT_APP_API_URL` empty.
+- On Render, add a persistent disk mounted at `/var/data` and set `UPLOAD_DIR=/var/data/uploads` in the service environment. This keeps admin-uploaded product pictures across deploys. Without a disk, files in the server's local `uploads` folder are temporary.
 
 ### Option B: frontend on Vercel/Netlify, API on Render
 

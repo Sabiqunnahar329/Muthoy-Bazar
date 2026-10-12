@@ -3,7 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../uploads');
+const dir = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(path.dirname(fileURLToPath(import.meta.url)), '../../uploads');
 fs.mkdirSync(dir, { recursive: true });
 
 export default multer({
