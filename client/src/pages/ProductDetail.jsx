@@ -21,13 +21,14 @@ export default function ProductDetail() {
   const [img, setImg] = useState(0);
   const [missing, setMissing] = useState(false);
   const [rating, setRating] = useState(5);
+  const [reviewerName, setReviewerName] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [reviewSuccess, setReviewSuccess] = useState('');
 
   useEffect(() => {
-    setP(null); setQty(1); setImg(0); setMissing(false); setReviewError(''); setReviewSuccess(''); setRating(5); setReviewText('');
+    setP(null); setQty(1); setImg(0); setMissing(false); setReviewError(''); setReviewSuccess(''); setRating(5); setReviewerName(''); setReviewText('');
     api.get(`/products/${id}`).then(async (r) => {
       setP(r.data);
       trackEvent('ViewContent', { product: id, path: `/product/${id}` });
@@ -38,16 +39,13 @@ export default function ProductDetail() {
 
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
-    if (!user) {
-      setReviewError('Please log in to rate and review this product.');
-      return;
-    }
     setSubmitting(true);
     setReviewError('');
     setReviewSuccess('');
     try {
-      const { data } = await api.post(`/products/${id}/reviews`, { rating, review: reviewText });
+      const { data } = await api.post(`/products/${id}/reviews`, { name: user?.name || reviewerName, rating, review: reviewText });
       setP(data);
+      setReviewerName('');
       setReviewText('');
       setRating(5);
       setReviewSuccess('Thank you! Your review has been added.');
@@ -132,10 +130,12 @@ export default function ProductDetail() {
 
           <form onSubmit={handleReviewSubmit} className="rounded-2xl border bg-gray-50 p-5">
             <h3 className="text-lg font-semibold">Write a review</h3>
-            {!user ? (
-              <p className="mt-3 text-sm text-gray-600">Please <Link to="/login" className="font-medium text-brand underline">log in</Link> to give a rating and review.</p>
-            ) : (
-              <>
+            <p className="mt-2 text-sm text-gray-600">You can leave a rating and review without logging in.</p>
+            <>
+                <div className="mt-4">
+                  <label htmlFor="reviewerName" className="mb-2 block text-sm font-medium text-gray-700">Your name</label>
+                  <input id="reviewerName" type="text" value={user?.name || reviewerName} onChange={(e) => setReviewerName(e.target.value)} maxLength={80} placeholder="Enter your name" className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm outline-none transition focus:border-brand disabled:bg-gray-100" disabled={!!user} required />
+                </div>
                 <div className="mt-4">
                   <label className="mb-2 block text-sm font-medium text-gray-700">Your rating</label>
                   <div className="flex items-center gap-2">
@@ -158,8 +158,7 @@ export default function ProductDetail() {
                 <button type="submit" disabled={submitting || !reviewText.trim()} className="mt-5 w-full rounded-lg bg-brand px-4 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
                   {submitting ? 'Submitting...' : 'Submit review'}
                 </button>
-              </>
-            )}
+            </>
           </form>
         </div>
       </section>

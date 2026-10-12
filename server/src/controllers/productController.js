@@ -51,18 +51,23 @@ export const addReview = asyncHandler(async (req, res) => {
   if (!product) throw err(404, 'Product not found');
 
   const rating = Number(req.body.rating);
+  const name = String(req.user?.name || req.body.name || '').trim();
   const reviewText = String(req.body.review || '').trim();
 
   if (!Number.isFinite(rating) || rating < 1 || rating > 5) throw err(400, 'Rating must be between 1 and 5');
+  if (!name) throw err(400, 'Please enter your name');
+  if (name.length > 80) throw err(400, 'Name must be 80 characters or less');
   if (!reviewText) throw err(400, 'Please add a review before submitting');
   if (reviewText.length > 500) throw err(400, 'Review must be 500 characters or less');
 
-  const existingReview = product.reviews?.find((item) => item.user?.toString() === req.user._id.toString());
-  if (existingReview) throw err(400, 'You already reviewed this product');
+  if (req.user) {
+    const existingReview = product.reviews?.find((item) => item.user?.toString() === req.user._id.toString());
+    if (existingReview) throw err(400, 'You already reviewed this product');
+  }
 
   product.reviews.push({
-    user: req.user._id,
-    name: req.user.name,
+    user: req.user?._id,
+    name,
     rating,
     review: reviewText,
   });
