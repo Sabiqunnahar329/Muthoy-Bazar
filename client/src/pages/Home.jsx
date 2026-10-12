@@ -4,16 +4,17 @@ import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import api from '../lib/api.js';
 import ProductCard from '../components/ProductCard.jsx';
 import { useCart } from '../context/CartContext.jsx';
-import { emoji, money } from '../lib/helpers.js';
+import { emoji, money, localizedLabel } from '../lib/helpers.js';
+import { useLang } from '../context/LanguageContext.jsx';
 
-function Section({ title, to, products }) {
+function Section({ title, to, products, viewAll }) {
   const safeProducts = Array.isArray(products) ? products : [];
   if (!safeProducts.length) return null;
   return (
     <section className="mt-10">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="text-2xl font-bold">{title}</h2>
-        {to && <Link to={to} className="font-semibold text-brand hover:underline">View all items</Link>}
+        {to && <Link to={to} className="font-semibold text-brand hover:underline">{viewAll}</Link>}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {safeProducts.map((p) => <ProductCard key={p._id} p={p} />)}
@@ -36,13 +37,14 @@ const SLIDES = [
 
 const FEATURED = ['Rice', 'Cooking Oil', 'Ghee', 'Spices', 'Tea', 'Coffee', 'Honey', 'Dates', 'Dry Fruits', 'Noodles'];
 
-function HeroSlider({ settings }) {
+function HeroSlider({ settings, t }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
-  const slides = settings ? [
-    { ...SLIDES[0], title: settings.heroTitle || SLIDES[0].title, text: settings.heroText || SLIDES[0].text, cta: settings.heroCta || SLIDES[0].cta, to: settings.heroLink || SLIDES[0].to, img: settings.heroImage || SLIDES[0].img },
-    ...SLIDES.slice(1),
-  ] : SLIDES;
+  const slides = [
+    { ...SLIDES[0], title: settings?.heroTitle || t('tagline'), text: settings?.heroText || t('slide1Text'), cta: settings?.heroCta || t('slide1Cta'), to: settings?.heroLink || SLIDES[0].to, img: settings?.heroImage || SLIDES[0].img },
+    { ...SLIDES[1], title: t('slide2Title'), text: t('slide2Text'), cta: t('slide2Cta') },
+    { ...SLIDES[2], title: t('slide3Title'), text: t('slide3Text'), cta: t('slide3Cta') },
+  ];
   const go = (n) => setI((n + slides.length) % slides.length);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ function HeroSlider({ settings }) {
     <div
       className="relative min-h-60 overflow-hidden rounded-2xl sm:min-h-72 lg:min-h-80"
       onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
-      role="region" aria-roledescription="carousel" aria-label="Promotions"
+      role="region" aria-roledescription="carousel" aria-label={t('promotions')}
     >
       {slides.map((s, n) => (
         <div key={s.title} aria-hidden={n !== i} className={`absolute inset-0 bg-gradient-to-br ${s.bg} transition-opacity duration-700 ${n === i ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
@@ -70,8 +72,8 @@ function HeroSlider({ settings }) {
           </div>
         </div>
       ))}
-      <button onClick={() => go(i - 1)} aria-label="Previous slide" className={`${arrow} left-3`}><ChevronLeft size={20} /></button>
-      <button onClick={() => go(i + 1)} aria-label="Next slide" className={`${arrow} right-3`}><ChevronRight size={20} /></button>
+      <button onClick={() => go(i - 1)} aria-label={t('previousSlide')} className={`${arrow} left-3`}><ChevronLeft size={20} /></button>
+      <button onClick={() => go(i + 1)} aria-label={t('nextSlide')} className={`${arrow} right-3`}><ChevronRight size={20} /></button>
       <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2">
         {slides.map((s, n) => (
           <button key={s.title} onClick={() => setI(n)} aria-label={`Go to slide ${n + 1}`} aria-current={n === i} className={`h-2.5 rounded-full transition-all ${n === i ? 'w-6 bg-white' : 'w-2.5 bg-white/60'}`} />
@@ -87,6 +89,7 @@ export default function Home() {
   const [more, setMore] = useState({ list: [], page: 1, pages: 1, loading: false });
   const [status, setStatus] = useState('loading'); // loading, ok, empty or error
   const { count, subtotal, setOpen } = useCart();
+  const { lang, t } = useLang();
   const rail = useRef(null);
 
   const load = () => {
@@ -132,12 +135,12 @@ export default function Home() {
       {/* Floating cart widget on the right edge */}
       <button
         onClick={() => setOpen(true)}
-        aria-label={`Open cart: ${count} items, ${money(subtotal)}`}
+        aria-label={`${t('cart')}: ${count} ${t('items')}, ${money(subtotal)}`}
         className="fixed right-0 top-1/2 z-30 -translate-y-1/2 overflow-hidden rounded-l-xl bg-cta text-center text-white shadow-lg transition hover:bg-cta-dark"
       >
         <span className="flex flex-col items-center gap-1 px-3 pb-2 pt-2.5">
           <ShoppingBag size={22} />
-          <span className="text-xs font-bold">{count} Items</span>
+          <span className="text-xs font-bold">{lang === 'bn' ? count.toLocaleString('bn-BD') : count} {t('items')}</span>
         </span>
         <span className="block bg-black/20 px-3 py-1.5 text-xs font-bold">{money(subtotal)}</span>
       </button>
@@ -147,15 +150,15 @@ export default function Home() {
         <p role="status" className="mt-4 rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-white">{siteSettings.announcement}</p>
       )}
       <div className="mt-5 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <HeroSlider settings={siteSettings} />
+        <HeroSlider settings={siteSettings} t={t} />
         <Link to="/shop?flag=offer" className="relative flex min-h-48 flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-amber-100 to-orange-300 p-6 text-brand-dark transition hover:shadow-lg lg:min-h-80">
           <img src="/banners/promo.jpg" alt="" onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover" />
-          <span className="relative w-fit rounded-full bg-cta px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Offer zone</span>
+          <span className="relative w-fit rounded-full bg-cta px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">{t('offerZone')}</span>
           <span aria-hidden="true" className="relative self-end text-7xl drop-shadow sm:text-8xl">🛒</span>
           <span className="relative">
-            <b className="block text-2xl font-bold leading-tight">Save more on your monthly bazar</b>
-            <span className="mt-1 block text-sm">Discounted rice, oil, ghee, honey and more.</span>
-            <span className="mt-3 inline-block rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white">Shop offers</span>
+            <b className="block text-2xl font-bold leading-tight">{t('promoTitle')}</b>
+            <span className="mt-1 block text-sm">{t('promoText')}</span>
+            <span className="mt-3 inline-block rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white">{t('shopOffers')}</span>
           </span>
         </Link>
       </div>
@@ -163,42 +166,42 @@ export default function Home() {
       {/* Featured categories: horizontally scrollable circles */}
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Featured categories</h2>
+          <h2 className="text-2xl font-bold">{t('featuredCategories')}</h2>
           <div className="flex gap-2">
-            <button onClick={() => scrollRail(-1)} aria-label="Scroll categories left" className="rounded-full border bg-white p-2 text-brand hover:bg-brand-light"><ChevronLeft size={18} /></button>
-            <button onClick={() => scrollRail(1)} aria-label="Scroll categories right" className="rounded-full border bg-white p-2 text-brand hover:bg-brand-light"><ChevronRight size={18} /></button>
+            <button onClick={() => scrollRail(-1)} aria-label={t('scrollCategoriesLeft')} className="rounded-full border bg-white p-2 text-brand hover:bg-brand-light"><ChevronLeft size={18} /></button>
+            <button onClick={() => scrollRail(1)} aria-label={t('scrollCategoriesRight')} className="rounded-full border bg-white p-2 text-brand hover:bg-brand-light"><ChevronRight size={18} /></button>
           </div>
         </div>
         <div ref={rail} className="flex snap-x gap-5 overflow-x-auto pb-3" style={{ scrollbarWidth: 'none' }}>
           {FEATURED.map((n) => (
             <Link key={n} to={`/shop?category=${encodeURIComponent(n)}`} className="group w-28 shrink-0 snap-start text-center sm:w-32">
               <span className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand/10 bg-gradient-to-br from-brand-light to-white text-5xl shadow-sm transition group-hover:scale-105 group-hover:border-brand sm:h-28 sm:w-28 sm:text-6xl">{emoji(n)}</span>
-              <span className="mt-2 block text-sm font-semibold group-hover:text-brand">{n}</span>
+              <span className="mt-2 block text-sm font-semibold group-hover:text-brand">{localizedLabel(n, lang)}</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {status === 'loading' && <p className="mt-10 text-center text-gray-500" role="status">Loading products…</p>}
+      {status === 'loading' && <p className="mt-10 text-center text-gray-500" role="status">{t('loadingProducts')}</p>}
       {status === 'error' && (
         <div role="alert" className="mt-10 rounded-xl border border-red-200 bg-red-50 p-5 text-center">
-          <p className="font-semibold text-red-800">We could not load the products.</p>
-          <p className="mt-1 text-sm text-red-700">The server may be starting up after a quiet period, which can take up to a minute. Please try again.</p>
-          <button onClick={load} className="mt-3 rounded-lg bg-cta px-5 py-2 font-semibold text-white hover:bg-cta-dark">Try again</button>
+          <p className="font-semibold text-red-800">{t('loadProductsError')}</p>
+          <p className="mt-1 text-sm text-red-700">{t('serverStarting')}</p>
+          <button onClick={load} className="mt-3 rounded-lg bg-cta px-5 py-2 font-semibold text-white hover:bg-cta-dark">{t('tryAgain')}</button>
         </div>
       )}
       {status === 'empty' && (
         <p className="mt-10 rounded-xl border bg-white p-5 text-center text-gray-600">
-          No products are available yet.
+          {t('noProducts')}
           {process.env.NODE_ENV !== 'production' && ' (Development note: the database returned no products. Run "npm run seed" in the server folder and check that MONGO_URI uses the database that was seeded.)'}
         </p>
       )}
 
-      <Section title="Top selling products" to="/shop?flag=best" products={d.best} />
+      <Section title={t('topSelling')} to="/shop?flag=best" products={d.best} viewAll={t('viewAllItems')} />
 
       {safeBrands.length > 0 && (
         <section className="mt-10">
-          <h2 className="mb-4 text-2xl font-bold">Our brands</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('ourBrands')}</h2>
           <div className="flex flex-wrap gap-2">
             {safeBrands.slice(0, 12).map((b) => (
               <Link key={b} to={`/shop?brand=${encodeURIComponent(b)}`} className="rounded-lg border bg-white px-4 py-2 font-semibold hover:border-brand hover:text-brand">
@@ -209,21 +212,21 @@ export default function Home() {
         </section>
       )}
 
-      <Section title="Offer zone" to="/shop?flag=offer" products={d.offer} />
-      <Section title="New arrivals" to="/shop?flag=new" products={d.fresh} />
-      <Section title="Just for you" to="/shop" products={more.list} />
+      <Section title={t('offerZone')} to="/shop?flag=offer" products={d.offer} viewAll={t('viewAllItems')} />
+      <Section title={t('newArrivals')} to="/shop?flag=new" products={d.fresh} viewAll={t('viewAllItems')} />
+      <Section title={t('justForYou')} to="/shop" products={more.list} viewAll={t('viewAllItems')} />
       {more.page < more.pages && (
         <div className="mt-6 text-center">
           <button onClick={loadMore} disabled={more.loading} className="rounded-lg border-2 border-brand px-8 py-2 font-semibold text-brand hover:bg-brand-light disabled:opacity-60">
-            {more.loading ? 'Loading…' : 'Load more'}
+            {more.loading ? t('loadingProducts') : t('loadMore')}
           </button>
         </div>
       )}
 
       <section className="mt-12">
-        <h2 className="mb-4 text-2xl font-bold">What our customers say</h2>
+        <h2 className="mb-4 text-2xl font-bold">{t('customersSay')}</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          {[['Rice and oil arrived in two days, sealed and fresh. I will order again next month.', 'Rahim U.', 'Service holder, Dhaka'], ['Cash on delivery makes it easy. The ghee quality is better than the local shop.', 'Nusrat J.', 'Teacher, Chattogram'], ['Good prices on monthly bazar items. Support answered my questions the same day.', 'Sabbir A.', 'Business owner, Sylhet']].map(([q, n, r]) => (
+          [[t('review1'), 'Rahim U.', t('serviceHolder')], [t('review2'), 'Nusrat J.', t('teacher')], [t('review3'), 'Sabbir A.', t('businessOwner')]].map(([q, n, r]) => (
             <figure key={n} className="rounded-xl border bg-white p-5"><blockquote className="mb-3">{q}</blockquote><figcaption className="text-sm"><b>{n}</b> <span className="text-gray-500">{r}</span></figcaption></figure>
           ))}
         </div>

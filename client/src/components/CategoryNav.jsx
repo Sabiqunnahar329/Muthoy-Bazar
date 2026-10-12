@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutGrid, ChevronDown } from 'lucide-react';
+import { useLang } from '../context/LanguageContext.jsx';
+import { localizedLabel } from '../lib/helpers.js';
 
 const cat = (n) => `/shop?category=${encodeURIComponent(n)}`;
 const flag = (f) => `/shop?flag=${f}`;
@@ -27,6 +29,7 @@ const itemClass = 'flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-
 const subClass = 'block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-[#8c6747]/10 hover:font-medium hover:text-[#8c6747] focus-visible:bg-[#8c6747]/10 focus-visible:text-[#8c6747]';
 
 export default function CategoryNav({ items = DEFAULT_NAV }) {
+  const { t, lang } = useLang();
   const [open, setOpen] = useState(null); // { i, left, top, width } for the sub-menu that is open
   const [allOpen, setAllOpen] = useState(false); // the "All" dropdown
   const root = useRef(null);
@@ -67,7 +70,7 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
   const current = open ? items[open.i] : null;
 
   return (
-    <nav ref={root} aria-label="Categories" onMouseLeave={() => setOpen(null)} className="relative border-y border-gray-200 bg-white">
+    <nav ref={root} aria-label={t('categories')} onMouseLeave={() => setOpen(null)} className="relative border-y border-gray-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2">
         <button
           type="button"
@@ -77,7 +80,7 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
           className="flex shrink-0 items-center gap-2 rounded-lg bg-[#8c6747] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#7a5a3d]"
         >
           <LayoutGrid size={18} />
-          All
+          {t('allCategories')}
           <ChevronDown size={16} className={`transition-transform duration-200 ${allOpen ? 'rotate-180' : ''}`} />
         </button>
 
@@ -95,13 +98,13 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
               >
                 {has && !it.to ? (
                   <button type="button" aria-haspopup="true" aria-expanded={isOpen} onClick={() => toggleMenu(i)} className={itemClass}>
-                    {it.label}{chevron}
+                    {localizedLabel(it.label, lang)}{chevron}
                   </button>
                 ) : (
                   <div className="flex items-center">
-                    <Link to={it.to} onClick={closeAll} className={itemClass}>{it.label}</Link>
+                    <Link to={it.to} onClick={closeAll} className={itemClass}>{localizedLabel(it.label, lang)}</Link>
                     {has && (
-                      <button type="button" aria-haspopup="true" aria-expanded={isOpen} aria-label={`${it.label} sub-menu`} onClick={() => toggleMenu(i)} className="-ml-2 rounded-md p-2 hover:text-[#8c6747]">
+                      <button type="button" aria-haspopup="true" aria-expanded={isOpen} aria-label={`${localizedLabel(it.label, lang)} sub-menu`} onClick={() => toggleMenu(i)} className="-ml-2 rounded-md p-2 hover:text-[#8c6747]">
                         {chevron}
                       </button>
                     )}
@@ -121,11 +124,11 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
               {items.map((it) => (
                 <div key={it.label}>
                   {it.to
-                    ? <Link to={it.to} onClick={closeAll} className="font-bold text-gray-900 hover:text-[#8c6747]">{it.label}</Link>
-                    : <p className="font-bold text-gray-900">{it.label}</p>}
+                    ? <Link to={it.to} onClick={closeAll} className="font-bold text-gray-900 hover:text-[#8c6747]">{localizedLabel(it.label, lang)}</Link>
+                    : <p className="font-bold text-gray-900">{localizedLabel(it.label, lang)}</p>}
                   {it.children?.length > 0 && (
                     <ul className="mt-1 space-y-0.5">
-                      {it.children.map((c) => <li key={c.label}><Link to={c.to} onClick={closeAll} className="text-sm text-gray-600 hover:text-[#8c6747]">{c.label}</Link></li>)}
+                    {it.children.map((c) => <li key={c.label}><Link to={c.to} onClick={closeAll} className="text-sm text-gray-600 hover:text-[#8c6747]">{localizedLabel(c.label, lang)}</Link></li>)}
                     </ul>
                   )}
                 </div>
@@ -142,7 +145,7 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
           className={`fixed z-50 max-h-[70vh] overflow-y-auto rounded-b-lg border border-gray-200 bg-white py-1.5 shadow-xl ${current.children.length > 8 ? 'grid grid-cols-2' : ''}`}
         >
           {current.children.map((c) => (
-            <li key={c.label}><Link to={c.to} onClick={closeAll} className={subClass}>{c.label}</Link></li>
+            <li key={c.label}><Link to={c.to} onClick={closeAll} className={subClass}>{localizedLabel(c.label, lang)}</Link></li>
           ))}
         </ul>
       )}

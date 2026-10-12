@@ -47,7 +47,7 @@ app.use(
     crossOriginEmbedderPolicy: false,
     contentSecurityPolicy: {
       directives: {
-        'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com'],
+        frameSrc: ["'self'", 'https://www.google.com', 'https://maps.google.com'],
       },
     },
   })

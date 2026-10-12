@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { Facebook, Phone, Mail, MapPin, X } from 'lucide-react';
 import { useLang } from '../context/LanguageContext';
 import useMenu from '../lib/useMenu';
+import { localizedLabel } from '../lib/helpers.js';
 
 const FACEBOOK = 'https://www.facebook.com/MuthoyBazaar';
 const DEVELOPER_FACEBOOK = 'https://www.facebook.com/share/19zN7CPnZq/';
 const ADDRESS = 'মেসার্স আব্দুল লতিফ স্টোর, শ্যামবাজার, ঢাকা, বাংলাদেশ';
 const MAP_URL = 'https://www.google.com/maps/place/%E0%A6%AE%E0%A7%87%E0%A6%B8%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B8+%E0%A6%86%E0%A6%AC%E0%A7%8D%E0%A6%A6%E0%A7%81%E0%A6%B2+%E0%A6%B2%E0%A6%A4%E0%A6%BF%E0%A6%AB+%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A7%8B%E0%A6%B0/@23.7037076,90.4140163,50m/data=!3m1!1e3!4m6!3m5!1s0x3755b9848728638b:0x268ed1d23b258e63!8m2!3d23.7036629!4d90.4141469!16s%2Fg%2F11xt4b9q_2';
-const MAP_SRC = 'https://www.google.com/maps?q=23.7036629,90.4141469&z=18&output=embed';
+const MAP_SRC = 'https://maps.google.com/maps?hl=bn&q=23.7036629%2C90.4141469&z=18&output=embed';
 
 // Edit the policy wording with your own terms before launch.
 const POLICIES = {
@@ -19,7 +20,7 @@ const POLICIES = {
 };
 
 export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscuits', 'Breakfast Items', 'Cleaning Supplies', 'Coffee'] }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const menu = useMenu();
   const quick = menu?.footer?.length ? menu.footer : null;
   const [policy, setPolicy] = useState(null);
@@ -45,7 +46,7 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
             <div>
               <p className="text-xl font-bold text-gray-900">Muthoy Bazar</p>
               <p className="text-sm text-gray-700">সাধ্যের মধ্যে স্বস্তির বাজার</p>
-              <p className="text-xs text-gray-500">Affordable and comfortable shopping</p>
+              {lang === 'en' && <p className="text-xs text-gray-500">Affordable and comfortable shopping</p>}
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-gray-600">{t('about')}</p>
@@ -65,14 +66,14 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
                 <li><Link className={link} to="/shop">{t('shop')}</Link></li>
                 <li><Link className={link} to="/cart">{t('cart')}</Link></li>
                 <li><Link className={link} to="/contact">{t('contact')}</Link></li>
-                <li><Link className={link} to="/track">Track order</Link></li>
+                <li><Link className={link} to="/track">{t('trackOrder')}</Link></li>
               </>
             )}
           </ul>
           <h3 className="mb-3 mt-6 text-lg font-bold text-gray-900">{t('policies')}</h3>
           <ul className="space-y-2">
             {Object.entries(POLICIES).map(([key, p]) => (
-              <li key={key}><button onClick={() => setPolicy(key)} className={link}>{p.title}</button></li>
+              <li key={key}><button onClick={() => setPolicy(key)} className={link}>{t(`${key}Policy`)}</button></li>
             ))}
           </ul>
         </div>
@@ -81,7 +82,7 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
           <h3 className={heading}>{t('categories')}</h3>
           <ul className="space-y-2">
             {categories.map((c) => (
-              <li key={c}><Link className={link} to={`/shop?category=${encodeURIComponent(c)}`}>{c}</Link></li>
+              <li key={c}><Link className={link} to={`/shop?category=${encodeURIComponent(c)}`}>{localizedLabel(c, lang)}</Link></li>
             ))}
           </ul>
         </div>
@@ -98,10 +99,10 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
 
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <iframe
-          title="Muthoy Bazar location" src={MAP_SRC} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+          title="Muthoy Bazar location" src={MAP_SRC} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
           className="h-64 w-full rounded-xl border border-gray-200 sm:h-72"
         />
-        <a href={MAP_URL} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-brand hover:underline">Open this location in Google Maps</a>
+        <a href={MAP_URL} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-brand hover:underline">{t('openMap')}</a>
       </div>
 
       <div className="border-t border-gray-200">
