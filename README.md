@@ -89,7 +89,7 @@ On Render (Web Service), Railway, a VPS, etc.:
 - Start command: `npm start`
 - Environment variables: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your site address), `NODE_ENV=production`, `TRUST_PROXY=1`
 - Leave `REACT_APP_API_URL` empty.
-- On Render, add a persistent disk mounted at `/var/data` and set `UPLOAD_DIR=/var/data/uploads` in the service environment. This keeps admin-uploaded product pictures across deploys. Without a disk, files in the server's local `uploads` folder are temporary.
+- For persistent product images on Render's free plan, create a Cloudinary account and add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` to the service environment. New admin uploads then go to Cloudinary. Production uploads are rejected until Cloudinary is configured, rather than saving files that would disappear on redeploy.
 
 ### Option B: frontend on Vercel/Netlify, API on Render
 
@@ -104,8 +104,7 @@ On Render (Web Service), Railway, a VPS, etc.:
 - Set `CLIENT_URL` in `server/.env` to your site address, use a long random `JWT_SECRET`, and set `NODE_ENV=production`
   (this also hides the development reset code on the forgot-password page).
 - If the API runs behind a reverse proxy, set `TRUST_PROXY=1`, otherwise IP blocking sees the proxy address instead of the visitor.
-- Pictures uploaded in admin are stored on the server disk (`/uploads/...`). Free Render disks are wiped on every redeploy,
-  so attach a persistent disk (mounted at `server/uploads`) or use your own product photos in `client/public/products/`.
+- When Cloudinary is configured, newly uploaded product pictures are stored in the `muthoy-bazar/products` folder. Existing `/uploads/...` files are not migrated automatically; download/keep a copy before changing hosting if they are still available.
 - Password reset codes for email accounts are printed in the server console. Connect an email service in
   `server/src/controllers/authController.js` to send them. Phone accounts receive the code by SMS.
 

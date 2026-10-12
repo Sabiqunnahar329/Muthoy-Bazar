@@ -129,7 +129,7 @@ export const imageAudit = asyncHandler(async (req, res) => {
 export const create = asyncHandler(async (req, res) => {
   const d = parse(req.body);
   await check(d);
-  const images = (req.files || []).map((f) => `/uploads/${f.filename}`);
+  const images = (req.files || []).map((f) => f.secureUrl || `/uploads/${f.filename}`);
   const p = await Product.create({ ...d, images, sku: `MB-${Date.now().toString(36).toUpperCase()}` });
   res.status(201).json(p);
 });
@@ -142,7 +142,7 @@ export const update = asyncHandler(async (req, res) => {
   const keep = req.body.existingImages ? JSON.parse(req.body.existingImages) : p.images;
   removeFiles(p.images.filter((u) => !keep.includes(u)));
   p.set(d);
-  p.images = [...keep, ...(req.files || []).map((f) => `/uploads/${f.filename}`)];
+  p.images = [...keep, ...(req.files || []).map((f) => f.secureUrl || `/uploads/${f.filename}`)];
   await p.save();
   res.json(p);
 });
