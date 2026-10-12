@@ -13,7 +13,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const { t } = useLang();
 
-  const row = 'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 font-medium text-gray-800 transition hover:border-cta hover:bg-orange-50';
+  const row = 'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 font-medium text-gray-800 transition hover:border-cta hover:bg-brand-light';
 
   return (
     <div className="fixed bottom-5 right-5 z-40">

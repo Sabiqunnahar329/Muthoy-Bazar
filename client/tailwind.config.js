@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         brand: { DEFAULT: '#0b4d3c', dark: '#083a2d', light: '#e6f1ed' },
-        cta: { DEFAULT: '#f97316', dark: '#ea580c' },
+        cta: { DEFAULT: '#a98261', dark: '#8c6747' },
         surface: '#f9fafb',
       },
       fontFamily: { sans: ['"Hind Siliguri"', 'Inter', 'system-ui', 'sans-serif'] },
