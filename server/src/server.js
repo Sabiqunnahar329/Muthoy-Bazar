@@ -44,7 +44,12 @@ if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PRO
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com'],
+      },
+    },
   })
 );
 
