@@ -46,6 +46,31 @@ export const getOne = asyncHandler(async (req, res) => {
   res.json(p);
 });
 
+export const addReview = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) throw err(404, 'Product not found');
+
+  const rating = Number(req.body.rating);
+  const reviewText = String(req.body.review || '').trim();
+
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) throw err(400, 'Rating must be between 1 and 5');
+  if (!reviewText) throw err(400, 'Please add a review before submitting');
+  if (reviewText.length > 500) throw err(400, 'Review must be 500 characters or less');
+
+  const existingReview = product.reviews?.find((item) => item.user?.toString() === req.user._id.toString());
+  if (existingReview) throw err(400, 'You already reviewed this product');
+
+  product.reviews.push({
+    user: req.user._id,
+    name: req.user.name,
+    rating,
+    review: reviewText,
+  });
+
+  await product.save();
+  res.status(201).json(product);
+});
+
 const parse = (b) => ({
   name: b.name?.trim(),
   nameBn: b.nameBn?.trim() || '',

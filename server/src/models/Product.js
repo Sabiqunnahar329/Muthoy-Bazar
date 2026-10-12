@@ -1,5 +1,16 @@
 import mongoose from 'mongoose';
 
+const reviewSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    name: { type: String, required: true, trim: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    review: { type: String, required: true, trim: true, maxlength: 500 },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -17,6 +28,7 @@ const productSchema = new mongoose.Schema(
     unit: { type: String, default: 'pcs' },
     rating: { type: Number, default: 4 },
     numReviews: { type: Number, default: 0 },
+    reviews: { type: [reviewSchema], default: [] },
     isFeatured: { type: Boolean, default: false },
     isBestSeller: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
@@ -27,6 +39,15 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ name: 'text', brand: 'text' });
 productSchema.pre('save', function (next) {
   this.effectivePrice = this.discountPrice > 0 ? this.discountPrice : this.price;
+  const totalReviews = Array.isArray(this.reviews) ? this.reviews.length : 0;
+  if (totalReviews > 0) {
+    const totalRating = this.reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0);
+    this.rating = Number((totalRating / totalReviews).toFixed(1));
+    this.numReviews = totalReviews;
+  } else {
+    this.numReviews = 0;
+    this.rating = Number(this.rating || 4);
+  }
   next();
 });
 
