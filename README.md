@@ -10,6 +10,7 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 **Storefront**
 - Home page with banners, featured categories, top selling, offer zone, new arrivals, brands and "Load more"
 - Shop page with category, brand, offer/new/best filters, search and sorting
+- Product names switch between Bengali and English with the storefront language; Bengali catalog names are populated by `npm run seed` and editable in Admin > Product
 - Product page, cart drawer with "You may also like", one-page checkout
   (delivery charge worked out automatically: 80 BDT when the city or address says Dhaka, 150 BDT elsewhere; Cash on delivery, bKash, Nagad, coupon codes)
 - Order tracking by order ID, optional customer login and registration, forgot password
@@ -67,6 +68,7 @@ Admin login: the `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `server/.env`
 (default `admin@muthoybazar.com` / `ChangeMe123`). Change the password before going live.
 
 `npm run seed -- --fresh` wipes categories and products and loads the catalog again.
+To populate Bengali names on an existing catalog, deploy the updated server and run `npm run seed` once from `server` with its production `MONGO_URI`; this updates product-name translations without replacing products, stock, or categories. Do not use `--fresh` for this.
 
 ## Product pictures
 

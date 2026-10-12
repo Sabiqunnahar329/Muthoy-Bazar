@@ -20,7 +20,7 @@ export const list = asyncHandler(async (req, res) => {
   if (brand) q.brand = brand;
   if (search) {
     const rx = new RegExp(escapeRegex(search), 'i');
-    q.$or = [{ name: rx }, { brand: rx }];
+    q.$or = [{ name: rx }, { nameBn: rx }, { brand: rx }];
   }
   if (flag === 'best') q.isBestSeller = true;
   if (flag === 'new') q.isNewArrival = true;
@@ -48,6 +48,7 @@ export const getOne = asyncHandler(async (req, res) => {
 
 const parse = (b) => ({
   name: b.name?.trim(),
+  nameBn: b.nameBn?.trim() || '',
   brand: b.brand?.trim() || '',
   category: b.category,
   description: b.description || '',

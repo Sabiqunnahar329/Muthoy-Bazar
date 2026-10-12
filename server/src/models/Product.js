@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    nameBn: { type: String, default: '', trim: true },
     brand: { type: String, default: '', trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
     description: { type: String, default: '' },

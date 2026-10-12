@@ -4,13 +4,15 @@ import { Minus, Plus } from 'lucide-react';
 import api from '../lib/api.js';
 import ProductCard from '../components/ProductCard.jsx';
 import { useCart } from '../context/CartContext.jsx';
-import { money, emoji } from '../lib/helpers.js';
+import { money, emoji, productName } from '../lib/helpers.js';
 import { trackEvent } from '../lib/trackEvent.js';
+import { useLang } from '../context/LanguageContext.jsx';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { add } = useCart();
+  const { lang } = useLang();
   const [p, setP] = useState(null);
   const [related, setRelated] = useState([]);
   const [qty, setQty] = useState(1);
@@ -34,12 +36,12 @@ export default function ProductDetail() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
-      <p className="text-sm text-gray-500"><Link to="/" className="text-brand hover:underline">Home</Link> / <Link to={`/shop?category=${encodeURIComponent(p.category?.name || '')}`} className="text-brand hover:underline">{p.category?.name}</Link> / {p.name}</p>
+      <p className="text-sm text-gray-500"><Link to="/" className="text-brand hover:underline">Home</Link> / <Link to={`/shop?category=${encodeURIComponent(p.category?.name || '')}`} className="text-brand hover:underline">{p.category?.name}</Link> / {productName(p, lang)}</p>
       <div className="mt-4 grid gap-8 md:grid-cols-2">
         <div>
           <div className="relative aspect-square overflow-hidden rounded-2xl border bg-brand-light">
             <span className="absolute inset-0 flex items-center justify-center text-8xl">{emoji(p.category?.name)}</span>
-            {p.images?.[img] && <img src={p.images[img]} alt={p.name} onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover" />}
+            {p.images?.[img] && <img src={p.images[img]} alt={productName(p, lang)} onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover" />}
           </div>
           {p.images?.length > 1 && (
             <div className="mt-3 flex gap-2">{p.images.map((u, i) => <button key={u} onClick={() => setImg(i)} className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${i === img ? 'border-cta' : 'border-transparent'}`}><img src={u} alt="" className="h-full w-full object-cover" /></button>)}</div>
@@ -47,7 +49,7 @@ export default function ProductDetail() {
         </div>
         <div>
           <p className="text-sm text-gray-500">{p.brand}</p>
-          <h1 className="text-3xl font-bold">{p.name}</h1>
+          <h1 className="text-3xl font-bold">{productName(p, lang)}</h1>
           <p className="mt-1 text-gray-500">{p.weight} {p.unit} · SKU {p.sku}</p>
           <p className="mt-4 text-3xl font-bold text-brand">{money(price)} {p.discountPrice > 0 && <s className="ml-2 text-lg font-normal text-gray-400">{money(p.price)}</s>}</p>
           <p className={`mt-2 text-sm font-medium ${out ? 'text-red-600' : p.stock < 10 ? 'text-amber-700' : 'text-green-700'}`}>{out ? 'Out of stock' : p.stock < 10 ? `Only ${p.stock} left` : 'In stock'}</p>

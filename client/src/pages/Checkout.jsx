@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api.js';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { money, PHONE_RE, apiError } from '../lib/helpers.js';
+import { useLang } from '../context/LanguageContext.jsx';
+import { money, PHONE_RE, apiError, productName } from '../lib/helpers.js';
 import { trackEvent } from '../lib/trackEvent.js';
 
 // Delivery charge is worked out automatically. The server repeats this check, so the price cannot be changed in the browser.
@@ -14,6 +15,7 @@ const isDhaka = (text) => /dhaka|ঢাকা/i.test(text || '');
 export default function Checkout() {
   const { items, subtotal, clear } = useCart();
   const { user } = useAuth();
+  const { lang } = useLang();
   const navigate = useNavigate();
   const [f, setF] = useState({ name: user?.name || '', phone: user?.phone || '', city: '', address: '', pay: 'COD', sender: '', trx: '' });
   const [code, setCode] = useState('');
@@ -102,7 +104,7 @@ export default function Checkout() {
 
       <aside className="h-fit rounded-2xl border bg-white p-5 lg:col-span-2">
         <h2 className="mb-3 text-lg font-bold">Order summary</h2>
-        <ul className="divide-y text-sm">{items.map((i) => <li key={i._id} className="flex justify-between gap-3 py-2"><span>{i.name} × {i.qty}</span><b>{money((i.discountPrice || i.price) * i.qty)}</b></li>)}</ul>
+        <ul className="divide-y text-sm">{items.map((i) => <li key={i._id} className="flex justify-between gap-3 py-2"><span>{productName(i, lang)} × {i.qty}</span><b>{money((i.discountPrice || i.price) * i.qty)}</b></li>)}</ul>
         <div className="mt-4 flex gap-2"><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Coupon code" aria-label="Coupon code" className="min-w-0 flex-1 rounded-lg border px-3 py-2" /><button type="button" onClick={applyCoupon} className="rounded-lg border-2 border-brand px-4 font-semibold text-brand">Apply</button></div>
         {couponMsg && <p className={`mt-1 text-sm ${coupon ? 'text-green-700' : 'text-red-600'}`}>{couponMsg}</p>}
         <dl className="mt-4 space-y-1 border-t pt-3 text-sm">

@@ -6,6 +6,7 @@ import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import useMenu from '../lib/useMenu';
 import CategoryNav from './CategoryNav.jsx';
+import { productName } from '../lib/helpers.js';
 
 const money = (n) => `৳${Number(n).toLocaleString('en-US')}`;
 const itemClass = 'flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-gray-700 transition hover:text-brand sm:text-xs';
@@ -87,7 +88,7 @@ export default function Header({ cartCount = 0, onCartClick }) {
                   <li key={p._id}>
                     <button type="button" onClick={() => openProduct(p._id)} className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-brand-light">
                       <img src={p.images?.[0]} alt="" className="h-10 w-10 rounded object-cover" onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
-                      <span className="flex-1 text-sm">{p.name}</span>
+                      <span className="flex-1 text-sm">{productName(p, lang)}</span>
                       <span className="text-sm font-semibold text-brand">{money(p.discountPrice || p.price)}</span>
                     </button>
                   </li>

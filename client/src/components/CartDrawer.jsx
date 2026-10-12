@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
 import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { productName } from '../lib/helpers.js';
 
 const money = (n) => `৳${Number(n).toLocaleString('en-US')}.00`;
 const unit = (p) => p.discountPrice || p.price;
@@ -13,7 +14,7 @@ const unit = (p) => p.discountPrice || p.price;
  * handlers:    onInc(id) onDec(id) onRemove(id) onAdd(product)
  */
 export default function CartDrawer({ open, onClose, items = [], suggestions = [], onInc, onDec, onRemove, onAdd }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { user } = useAuth();
   const navigate = useNavigate();
   const rail = useRef(null);
@@ -44,7 +45,7 @@ export default function CartDrawer({ open, onClose, items = [], suggestions = []
             <div key={item._id} className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm">
               <img src={item.images?.[0]} alt="" className="h-16 w-16 rounded-lg border object-cover" onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-gray-900">{item.name}</p>
+                <p className="truncate font-medium text-gray-900">{productName(item, lang)}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-700">
                   <div className="flex items-center rounded-full border">
                     <button onClick={() => onDec(item._id)} aria-label="Decrease" className="p-1.5 hover:text-cta"><Minus size={14} /></button>
@@ -74,7 +75,7 @@ export default function CartDrawer({ open, onClose, items = [], suggestions = []
                   <div key={p._id} className="flex w-60 shrink-0 snap-start items-center gap-3 rounded-xl border bg-white p-3">
                     <img src={p.images?.[0]} alt="" className="h-14 w-14 rounded object-cover" onError={(e) => (e.currentTarget.style.visibility = 'hidden')} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{p.name}</p>
+                      <p className="truncate text-sm font-semibold">{productName(p, lang)}</p>
                       <p className="text-sm text-gray-600">{money(unit(p))}</p>
                       <button onClick={() => onAdd(p)} className="mt-1 flex items-center gap-1 rounded-full bg-cta px-3 py-0.5 text-sm font-medium text-white hover:bg-cta-dark">
                         <Plus size={14} /> {t('add')}

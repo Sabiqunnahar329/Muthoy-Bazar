@@ -1,4 +1,5 @@
 export const money = (n) => `৳${Number(n || 0).toLocaleString('en-US')}`;
+export const productName = (product, lang = 'en') => (lang === 'bn' && product?.nameBn ? product.nameBn : product?.name || '');
 export const PHONE_RE = /^01[3-9]\d{8}$/;
 
 const EMOJI = { Rice: '🍚', Eggs: '🥚', Tea: '🍵', Coffee: '☕', Honey: '🍯', 'Cooking Oil': '🫒', Spices: '🌶️', Dates: '🌴', 'Mineral Water': '💧', 'Soft Drinks': '🥤', Biscuits: '🍪', Snacks: '🥜', Noodles: '🍜', Soap: '🧼', Toothpaste: '🪥', 'Dry Fruits': '🌰', Salt: '🧂', Sugar: '🍬', 'Frozen Food': '🧊', 'Baby Food': '🍼', Ghee: '🧈', Lentils: '🫘', Beverages: '🧃', Oats: '🥣' };

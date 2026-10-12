@@ -24,6 +24,15 @@ if (!(await Category.countDocuments())) {
   console.log('Catalog already exists. Use --fresh to replace it.');
 }
 
+const translatedProducts = productData.filter((product) => product.nameBn);
+const translationResult = await Product.bulkWrite(translatedProducts.map((product) => ({
+  updateOne: {
+    filter: { name: product.name },
+    update: { $set: { nameBn: product.nameBn } },
+  },
+})));
+console.log(`Added Bengali names to ${translationResult.modifiedCount} existing products.`);
+
 const email = (process.env.ADMIN_EMAIL || 'admin@muthoybazar.com').toLowerCase();
 if (!(await User.findOne({ email }))) {
   await User.create({ name: process.env.ADMIN_NAME || 'Super Admin', email, password: process.env.ADMIN_PASSWORD || 'ChangeMe123', role: 'super_admin' });

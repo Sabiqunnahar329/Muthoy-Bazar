@@ -4,7 +4,7 @@ import api from '../lib/api.js';
 import { money, apiError } from '../lib/helpers.js';
 import { Modal, Card, th, td, field, btnPrimary, btnCta } from './ui.jsx';
 
-const blank = { name: '', brand: '', category: '', description: '', price: '', discountPrice: 0, stock: '', weight: '', unit: 'kg', isFeatured: false, isBestSeller: false, isNewArrival: false };
+const blank = { name: '', nameBn: '', brand: '', category: '', description: '', price: '', discountPrice: 0, stock: '', weight: '', unit: 'kg', isFeatured: false, isBestSeller: false, isNewArrival: false };
 
 export default function AdminProducts() {
   const [data, setData] = useState({ products: [], total: 0, pages: 1, page: 1 });
@@ -23,7 +23,7 @@ export default function AdminProducts() {
   const openForm = (p) => {
     setError('');
     setForm(p
-      ? { id: p._id, f: { name: p.name, brand: p.brand, category: p.category?._id || '', description: p.description, price: p.price, discountPrice: p.discountPrice, stock: p.stock, weight: p.weight ?? '', unit: p.unit, isFeatured: p.isFeatured, isBestSeller: p.isBestSeller, isNewArrival: p.isNewArrival }, existing: p.images, files: [] }
+      ? { id: p._id, f: { name: p.name, nameBn: p.nameBn || '', brand: p.brand, category: p.category?._id || '', description: p.description, price: p.price, discountPrice: p.discountPrice, stock: p.stock, weight: p.weight ?? '', unit: p.unit, isFeatured: p.isFeatured, isBestSeller: p.isBestSeller, isNewArrival: p.isNewArrival }, existing: p.images, files: [] }
       : { f: { ...blank, category: cats[0]?._id || '' }, existing: [], files: [] });
   };
   const setF = (k, v) => setForm((s) => ({ ...s, f: { ...s.f, [k]: v } }));
@@ -54,7 +54,7 @@ export default function AdminProducts() {
           <tbody>{data.products.map((p) => (
             <tr key={p._id}>
               <td className={td}><div className="relative h-11 w-11 overflow-hidden rounded-lg bg-brand-light">{p.images?.[0] && <img src={p.images[0]} alt="" onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover" />}</div></td>
-              <td className={td}><b>{p.name}</b><br /><span className="text-xs text-gray-500">{p.brand} · {p.weight} {p.unit}</span></td>
+              <td className={td}><b>{p.name}</b>{p.nameBn && <><br /><span className="text-sm">{p.nameBn}</span></>}<br /><span className="text-xs text-gray-500">{p.brand} · {p.weight} {p.unit}</span></td>
               <td className={td}>{p.category?.name}</td>
               <td className={td}>{p.discountPrice > 0 && <s className="mr-1 text-gray-400">{money(p.price)}</s>}{money(p.discountPrice || p.price)}</td>
               <td className={td}><span className={p.stock < 10 ? 'font-semibold text-red-600' : ''}>{p.stock}</span></td>
@@ -74,6 +74,7 @@ export default function AdminProducts() {
         <Modal title={form.id ? 'Edit product' : 'Add product'} onClose={() => setForm(null)} wide>
           <form onSubmit={save} noValidate className="grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium sm:col-span-2">Product name<input value={form.f.name} onChange={(e) => setF('name', e.target.value)} className={`${field} mt-1`} /></label>
+            <label className="text-sm font-medium sm:col-span-2">Product name in Bangla<input value={form.f.nameBn} onChange={(e) => setF('nameBn', e.target.value)} className={`${field} mt-1`} /></label>
             <label className="text-sm font-medium">Brand<input value={form.f.brand} onChange={(e) => setF('brand', e.target.value)} className={`${field} mt-1`} /></label>
             <label className="text-sm font-medium">Category<select value={form.f.category} onChange={(e) => setF('category', e.target.value)} className={`${field} mt-1`}>{cats.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}</select></label>
             <label className="text-sm font-medium">Price (৳)<input type="number" min="1" value={form.f.price} onChange={(e) => setF('price', e.target.value)} className={`${field} mt-1`} /></label>

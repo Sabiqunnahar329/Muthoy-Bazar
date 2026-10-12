@@ -1,3 +1,5 @@
+import productNamesBn from './productNamesBn.js';
+
 // category|name|brand|price|discountPrice|stock|weight|unit|flags(featured,bestSeller,newArrival)|description|imageUrl(optional)
 const RAW = `Rice|Premium Miniket Rice|Pran|620|590|40|5|kg|110|Fine-grain miniket rice, polished and ready for daily cooking.|https://i.ibb.co.com/4RPmPzM6/Natural-Miniket-Rice.jpg
 Rice|Basmati Rice|Kohinoor|780|0|35|5|kg|100|Long-grain aromatic basmati rice, ideal for biryani and pulao.
@@ -110,7 +112,7 @@ const slug = (n) => n.toLowerCase().replace(/\s+/g, '-');
 export default RAW.split('\n').map((line, i) => {
   const [category, name, brand, price, discountPrice, stock, weight, unit, flags, description, image] = line.split('|');
   return {
-    category, name, brand, description, unit,
+    category, name, nameBn: productNamesBn[name] || '', brand, description, unit,
     price: +price, discountPrice: +discountPrice, stock: +stock, weight: +weight,
     sku: `MB-${category.slice(0, 3).toUpperCase()}-${String(i + 1).padStart(4, '0')}`,
     // Put your own photos in client/public/products/<product-name>.jpg, or upload them in Admin > Product.
