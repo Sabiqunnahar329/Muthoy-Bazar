@@ -48,6 +48,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         frameSrc: ["'self'", 'https://www.google.com', 'https://maps.google.com'],
+        imgSrc: ["'self'", 'data:', 'https:'],
       },
     },
   })
