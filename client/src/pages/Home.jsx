@@ -36,13 +36,26 @@ const SLIDES = [
 ];
 
 const DEFAULT_HERO_TITLE = 'সাধ্যের মধ্যে স্বস্তির বাজার';
+const DEFAULT_HERO_TEXT = 'Rice, oil, spices and daily needs from trusted brands. Cash on delivery across Bangladesh.';
+const DEFAULT_HERO_CTA = 'Shop the offer zone';
+const DEFAULT_HERO_TEXT_BN = 'বিশ্বস্ত ব্র্যান্ডের চাল, তেল, মসলা ও নিত্যপ্রয়োজনীয় পণ্য। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।';
+const DEFAULT_HERO_CTA_BN = 'অফার দেখুন';
 const FEATURED = ['Rice', 'Cooking Oil', 'Ghee', 'Spices', 'Tea', 'Coffee', 'Honey', 'Dates', 'Dry Fruits', 'Noodles'];
+
+const localizedDefault = (value, defaults, translation) => !value || defaults.includes(value) ? translation : value;
 
 function HeroSlider({ settings, t }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   const slides = [
-    { ...SLIDES[0], title: !settings?.heroTitle || settings.heroTitle === DEFAULT_HERO_TITLE ? t('tagline') : settings.heroTitle, text: settings?.heroText || t('slide1Text'), cta: settings?.heroCta || t('slide1Cta'), to: settings?.heroLink || SLIDES[0].to, img: settings?.heroImage || SLIDES[0].img },
+    {
+      ...SLIDES[0],
+      title: localizedDefault(settings?.heroTitle, [DEFAULT_HERO_TITLE, 'Affordable and comfortable shopping'], t('tagline')),
+      text: localizedDefault(settings?.heroText, [DEFAULT_HERO_TEXT, DEFAULT_HERO_TEXT_BN], t('slide1Text')),
+      cta: localizedDefault(settings?.heroCta, [DEFAULT_HERO_CTA, DEFAULT_HERO_CTA_BN], t('slide1Cta')),
+      to: settings?.heroLink || SLIDES[0].to,
+      img: settings?.heroImage || SLIDES[0].img,
+    },
     { ...SLIDES[1], title: t('slide2Title'), text: t('slide2Text'), cta: t('slide2Cta') },
     { ...SLIDES[2], title: t('slide3Title'), text: t('slide3Text'), cta: t('slide3Cta') },
   ];
