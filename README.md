@@ -14,7 +14,8 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 - Product page, cart drawer with "You may also like", one-page checkout
   (delivery charge worked out automatically: 80 BDT when the city or address says Dhaka, 150 BDT elsewhere; Cash on delivery, bKash, Nagad, coupon codes)
 - Order tracking by order ID, optional customer login and registration, forgot password
-- Bangla / English toggle, chat widget (Messenger, WhatsApp, call), footer with map and policy pop-ups
+- Bangla / English toggle, chat widget (website message form, Facebook Messenger and WhatsApp), footer with map and policy pop-ups
+- After an order is delivered, the customer receives an SMS feedback link to rate each purchased item and optionally write a review
 
 **Admin** (`/admin`, login required)
 - Dashboard: revenue, orders, pending, low stock, 7-day chart, recent orders
@@ -44,7 +45,7 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 **Server**
 - REST API with JWT login, role checks, rate limiting on auth routes, helmet and CORS
 - Atomic stock deduction, server-side price calculation, phone validation, repeat-cancel "Risky" flag on orders
-- SMS helper (Greenweb). Without `SMS_TOKEN`, messages are printed in the server console
+- SMS helper (Greenweb), including delivery updates and post-delivery feedback links. Without `SMS_TOKEN`, messages are printed in the server console
 
 ## Run it locally
 

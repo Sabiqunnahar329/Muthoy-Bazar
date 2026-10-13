@@ -108,7 +108,7 @@ export default function ProductDetail() {
                       </div>
                       <span className="text-xs text-gray-500">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Just now'}</span>
                     </div>
-                    <p className="mt-3 leading-relaxed text-gray-700">{review.review}</p>
+                    {review.review && <p className="mt-3 leading-relaxed text-gray-700">{review.review}</p>}
                   </div>
                 ))}
               </div>

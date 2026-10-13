@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { ArrowLeft, MessageCircle, X, Phone } from 'lucide-react';
+import { ArrowLeft, Facebook, MessageCircle, X } from 'lucide-react';
 import { useLang } from '../context/LanguageContext';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
 
 const WHATSAPP = '8801612633433';
 const LINKS = {
+  messenger: 'https://m.me/MuthoyBazaar',
   whatsapp: `https://wa.me/${WHATSAPP}`,
-  call: `tel:+${WHATSAPP}`,
 };
 const emptyMessage = { name: '', phone: '', email: '', message: '' };
 
@@ -86,15 +86,15 @@ export default function ChatWidget() {
             <div className="space-y-2 bg-surface p-3">
               <button type="button" onClick={() => setShowForm(true)} className={`${row} w-full text-left`}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"><MessageCircle size={18} /></span>
-                {t('messenger')}
+                {t('websiteMessage')}
               </button>
+              <a href={LINKS.messenger} target="_blank" rel="noreferrer" className={row}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white"><Facebook size={18} /></span>
+                {t('messenger')}
+              </a>
               <a href={LINKS.whatsapp} target="_blank" rel="noreferrer" className={row}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 text-white"><MessageCircle size={18} /></span>
                 <span>{t('whatsapp')}<small className="block text-xs font-normal text-gray-500">+880 1612-633433</small></span>
-              </a>
-              <a href={LINKS.call} className={row}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cta text-white"><Phone size={18} /></span>
-                {t('helpline')}
               </a>
             </div>
           )}

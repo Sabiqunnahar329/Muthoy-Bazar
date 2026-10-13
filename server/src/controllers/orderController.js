@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import Order, { Counter, STATUSES } from '../models/Order.js';
 import Product from '../models/Product.js';
 import Coupon from '../models/Coupon.js';
@@ -114,11 +115,81 @@ export const setStatus = asyncHandler(async (req, res) => {
   if (!STATUSES.includes(status)) throw err(400, 'Invalid status');
   const o = await Order.findById(req.params.id);
   if (!o) throw err(404, 'Order not found');
+  const previousStatus = o.status;
   const wasCancelled = o.status === 'Cancelled';
   if (status === 'Cancelled' && !wasCancelled) await Promise.all(o.items.map((i) => Product.updateOne({ _id: i.product }, { $inc: { stock: i.qty } })));
   if (wasCancelled && status !== 'Cancelled') await Promise.all(o.items.map((i) => Product.updateOne({ _id: i.product }, { $inc: { stock: -i.qty } })));
   o.status = status;
+  let reviewUrl = '';
+  if (status === 'Delivered' && previousStatus !== status) {
+    const token = crypto.randomBytes(32).toString('hex');
+    o.reviewTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    reviewUrl = `${(process.env.CLIENT_URL || '').replace(/\/+$/, '')}/review/${token}`;
+  }
   await o.save();
-  sendSms(o.customer.phone, `Muthoy Bazar: your order ${o.orderNumber} is now ${status}.`);
+  if (reviewUrl) {
+    sendSms(o.customer.phone, `Muthoy Bazar: your order ${o.orderNumber} is delivered. Rate your items (review optional): ${reviewUrl}`);
+  } else {
+    sendSms(o.customer.phone, `Muthoy Bazar: your order ${o.orderNumber} is now ${status}.`);
+  }
   res.json(o);
+});
+
+const reviewOrderView = (order) => ({
+  orderNumber: order.orderNumber,
+  status: order.status,
+  items: order.items.map((item) => ({
+    product: item.product.toString(),
+    name: item.name,
+    image: item.image,
+    reviewed: !!item.reviewedAt,
+  })),
+});
+
+const findReviewOrderByToken = async (token) => {
+  if (!/^[a-f\d]{64}$/i.test(token)) return null;
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  return Order.findOne({ reviewTokenHash: tokenHash }).select('+reviewTokenHash');
+};
+
+export const getReviewOrder = asyncHandler(async (req, res) => {
+  const order = await findReviewOrderByToken(req.params.token);
+  if (!order) throw err(404, 'This feedback link is invalid or has expired');
+  if (order.status !== 'Delivered') throw err(409, 'Feedback is available after your order is delivered');
+  res.json(reviewOrderView(order));
+});
+
+export const submitOrderReview = asyncHandler(async (req, res) => {
+  const order = await findReviewOrderByToken(req.params.token);
+  if (!order) throw err(404, 'This feedback link is invalid or has expired');
+  if (order.status !== 'Delivered') throw err(409, 'Feedback is available after your order is delivered');
+
+  const productId = String(req.body.product || '');
+  const item = order.items.find((line) => line.product.toString() === productId);
+  if (!item) throw err(404, 'This product is not part of your order');
+  if (item.reviewedAt) throw err(409, 'You already rated this product');
+
+  const rating = Number(req.body.rating);
+  const reviewText = String(req.body.review || '').trim();
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw err(400, 'Choose a rating from 1 to 5');
+  if (reviewText.length > 500) throw err(400, 'Review must be 500 characters or less');
+
+  const product = await Product.findById(item.product);
+  if (!product) throw err(404, 'This product is no longer available');
+  if (!product.reviews.some((review) => review.order?.toString() === order._id.toString())) {
+    product.reviews.push({
+      order: order._id,
+      user: order.user,
+      name: order.customer.name,
+      rating,
+      review: reviewText,
+    });
+    await product.save();
+  }
+
+  item.reviewedAt = new Date();
+  item.reviewRating = rating;
+  item.reviewText = reviewText;
+  await order.save();
+  res.json({ product: productId, reviewed: true });
 });

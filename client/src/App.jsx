@@ -5,6 +5,7 @@ import Shop from './pages/Shop.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import Checkout from './pages/Checkout.jsx';
 import OrderSuccess from './pages/OrderSuccess.jsx';
+import OrderReview from './pages/OrderReview.jsx';
 import TrackOrder from './pages/TrackOrder.jsx';
 import Account from './pages/Account.jsx';
 import Contact from './pages/Contact.jsx';
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="checkout" element={<Checkout />} />
         <Route path="cart" element={<Navigate to="/checkout" replace />} />
         <Route path="order-success/:number" element={<OrderSuccess />} />
+        <Route path="review/:token" element={<OrderReview />} />
         <Route path="track" element={<TrackOrder />} />
         <Route path="account" element={<Account />} />
         <Route path="contact" element={<Contact />} />

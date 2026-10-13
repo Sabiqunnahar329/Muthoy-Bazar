@@ -15,6 +15,9 @@ const orderSchema = new mongoose.Schema(
         image: String,
         price: Number,
         qty: Number,
+        reviewedAt: Date,
+        reviewRating: Number,
+        reviewText: { type: String, default: '' },
       },
     ],
     subtotal: Number,
@@ -28,6 +31,7 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, enum: STATUSES, default: 'Pending' },
     flagged: { type: Boolean, default: false },
     ip: { type: String, index: true },
+    reviewTokenHash: { type: String, select: false },
   },
   { timestamps: true }
 );
