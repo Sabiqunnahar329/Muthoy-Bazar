@@ -23,7 +23,7 @@ export default function AdminMailbox({ source = '', title = 'Support Mailbox' })
   const open = async (m) => { setSel(m); setReply(''); setMsg(''); if (m.status === 'unread') { const { data } = await api.patch(`/support/${m._id}/read`).catch(() => ({ data: m })); setSel(data); load(); } };
   const send = async (e) => {
     e.preventDefault(); setMsg('');
-    try { const { data } = await api.post(`/support/${sel._id}/reply`, { reply }); setSel(data); setReply(''); setMsg(data.phone ? 'Reply saved and sent by SMS.' : 'Reply saved. This customer left an email only, so send it from your email app.'); load(); }
+    try { const { data } = await api.post(`/support/${sel._id}/reply`, { reply }); setSel(data); setReply(''); setMsg('Reply saved. The customer can read it from the website message inbox.'); load(); }
     catch (er) { setMsg(apiError(er)); }
   };
   const resetInboxCode = async () => {
@@ -31,7 +31,7 @@ export default function AdminMailbox({ source = '', title = 'Support Mailbox' })
     try {
       const { data } = await api.post(`/support/${sel._id}/inbox-code`);
       setInboxCode(data.accessCode);
-      setMsg(data.sentBySms ? 'New inbox access code sent to the customer by SMS.' : 'Send this code to the customer privately so they can recover their old messages.');
+      setMsg('Send this code to the customer privately so they can recover their old messages.');
     } catch (er) { setMsg(apiError(er)); }
   };
   const remove = async () => { await api.delete(`/support/${sel._id}`).catch(() => {}); setSel(null); load(); };

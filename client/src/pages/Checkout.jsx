@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useLang } from '../context/LanguageContext.jsx';
 import { money, PHONE_RE, apiError, productName } from '../lib/helpers.js';
 import { trackEvent } from '../lib/trackEvent.js';
+import { saveOrderAccessCode } from '../lib/orderAccess.js';
 
 // Delivery charge is worked out automatically. The server repeats this check, so the price cannot be changed in the browser.
 const DHAKA_FEE = 80;
@@ -66,6 +67,7 @@ export default function Checkout() {
         customer: { name: f.name, phone: f.phone, city: f.city, address: f.address },
         items: items.map((i) => ({ product: i._id, qty: i.qty })), paymentMethod: f.pay, senderNumber: f.sender, trxId: f.trx, couponCode: coupon?.code,
       });
+      saveOrderAccessCode(data.orderNumber, data.customerAccessToken);
       clear();
       navigate(`/order-success/${data.orderNumber}`, { state: { total: data.total, pay: data.paymentMethod } });
     } catch (err) { setServerErr(apiError(err)); } finally { setBusy(false); }

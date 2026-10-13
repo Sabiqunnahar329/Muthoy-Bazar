@@ -32,6 +32,7 @@ export default function Account() {
         <ul className="space-y-3">{orders.map((o) => (
           <li key={o._id} className="rounded-xl border bg-white p-4">
             <div className="flex flex-wrap items-center justify-between gap-2"><div><b>{o.orderNumber}</b><p className="text-sm text-gray-500">{fmtDate(o.createdAt)}</p></div><span className={`rounded-full px-3 py-0.5 text-sm font-semibold ${statusStyle[o.status]}`}>{o.status}</span></div>
+            <Link to={`/track/${o.orderNumber}`} className="mt-2 inline-block text-sm font-semibold text-brand hover:underline">Track order</Link>
             <ul className="mt-4 divide-y rounded-lg border">
               {o.items.map((item, index) => (
                 <li key={`${item.product || item.name}-${index}`} className="flex items-start gap-3 p-3">

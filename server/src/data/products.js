@@ -64,12 +64,12 @@ Dates|Dried Dates (Khejur)|Fresh|220|0|45|500|g|000|Everyday dried dates, natura
 Dry Fruits|Cashew Nuts|Kiam|780|0|30|500|g|100|Premium whole cashew nuts.
 Dry Fruits|Almonds|Kiam|720|690|30|500|g|010|California almonds, rich in nutrients.
 Dry Fruits|Raisins|Fresh|220|0|45|250|g|001|Sweet seedless raisins.
-Seeds|Chia Seeds|NutriLife|350|0|25|250|g|001|Nutrient-dense chia seeds for smoothies and puddings.|https://i.ibb.co.com/x83P8RtZ/Chia-Seeds.jpg
-Seeds|Flax Seeds|NutriLife|180|0|30|250|g|000|Ground flax seeds, high in fibre.
+Dry Fruits|Chia Seeds|NutriLife|350|0|25|250|g|001|Nutrient-dense chia seeds for smoothies and puddings.|https://i.ibb.co.com/x83P8RtZ/Chia-Seeds.jpg
+Dry Fruits|Flax Seeds|NutriLife|180|0|30|250|g|000|Ground flax seeds, high in fibre.
 Oats|Rolled Oats|Quaker|260|0|40|400|g|110|Wholesome rolled oats for a hearty breakfast.
 Oats|Instant Oats|PranUp|210|0|35|400|g|000|Quick-cook instant oats, ready in minutes.
-Peanut Butter|Smooth Peanut Butter|Pufito|320|0|35|340|g|010|Creamy smooth peanut butter.
-Peanut Butter|Crunchy Peanut Butter|Pufito|330|300|30|340|g|100|Crunchy peanut butter with real peanut bits.
+Snacks|Smooth Peanut Butter|Pufito|320|0|35|340|g|010|Creamy smooth peanut butter.
+Snacks|Crunchy Peanut Butter|Pufito|330|300|30|340|g|100|Crunchy peanut butter with real peanut bits.
 Jam|Mixed Fruit Jam|Pran|150|0|45|400|g|000|Sweet mixed fruit jam for toast and paratha.
 Jam|Strawberry Jam|Kissan|180|0|30|400|g|010|Classic strawberry jam.
 Jelly|Mixed Fruit Jelly Cups|Pran|90|0|50|12|pcs|001|Fun fruit jelly cups for kids.

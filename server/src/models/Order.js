@@ -31,6 +31,7 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, enum: STATUSES, default: 'Pending' },
     flagged: { type: Boolean, default: false },
     ip: { type: String, index: true },
+    customerAccessTokenHash: { type: String, select: false },
     reviewTokenHash: { type: String, select: false },
   },
   { timestamps: true }

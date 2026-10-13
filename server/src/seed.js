@@ -6,6 +6,11 @@ import User from './models/User.js';
 import categoryData from './data/categories.js';
 import productData from './data/products.js';
 
+const categoryDefinitions = categoryData.split('\n').map((line) => {
+  const [name, description] = line.split('|');
+  return { name, description };
+});
+
 // Usage: npm run seed            (adds the catalog if empty, creates the admin account)
 //        npm run seed -- --fresh (wipes categories and products first)
 await mongoose.connect(process.env.MONGO_URI);
@@ -16,12 +21,28 @@ if (process.argv.includes('--fresh')) {
 }
 
 if (!(await Category.countDocuments())) {
-  const cats = await Category.insertMany(categoryData.split('\n').map((l) => { const [name, description] = l.split('|'); return { name, description }; }));
+  const cats = await Category.insertMany(categoryDefinitions);
   const id = Object.fromEntries(cats.map((c) => [c.name, c._id]));
   await Product.create(productData.map((p) => ({ ...p, category: id[p.category] })));
   console.log(`Added ${cats.length} categories and ${productData.length} products`);
 } else {
   console.log('Catalog already exists. Use --fresh to replace it.');
+}
+
+for (const [sourceName, targetName] of [['Seeds', 'Dry Fruits'], ['Peanut Butter', 'Snacks']]) {
+  const targetDefinition = categoryDefinitions.find(({ name }) => name === targetName);
+  if (!targetDefinition) throw new Error(`Missing category definition for ${targetName}`);
+  const target = await Category.findOneAndUpdate(
+    { name: targetName },
+    { $set: { description: targetDefinition.description } },
+    { new: true, upsert: true }
+  );
+  const source = await Category.findOne({ name: sourceName });
+  if (source) {
+    const result = await Product.updateMany({ category: source._id }, { $set: { category: target._id } });
+    await source.deleteOne();
+    console.log(`Moved ${result.modifiedCount} products from ${sourceName} to ${targetName}`);
+  }
 }
 
 const translatedProducts = productData.filter((product) => product.nameBn);

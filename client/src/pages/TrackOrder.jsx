@@ -1,11 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import api from '../lib/api.js';
 import { STATUSES, statusStyle, fmtDate, apiError } from '../lib/helpers.js';
 
 export default function TrackOrder() {
+  const { number } = useParams();
   const [no, setNo] = useState('');
   const [res, setRes] = useState(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!number) return undefined;
+    let active = true;
+    setNo(number);
+    setRes(null);
+    setError('');
+    api.get(`/orders/track/${encodeURIComponent(number)}`)
+      .then(({ data }) => { if (active) setRes(data); })
+      .catch((requestError) => { if (active) setError(apiError(requestError, 'No order found with this ID')); });
+    return () => { active = false; };
+  }, [number]);
 
   const submit = async (e) => {
     e.preventDefault(); setRes(null); setError('');

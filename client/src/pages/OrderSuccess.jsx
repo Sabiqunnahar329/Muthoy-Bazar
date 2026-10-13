@@ -11,9 +11,9 @@ export default function OrderSuccess() {
       <h1 className="mt-4 text-2xl font-bold">Thank you! Your order is placed.</h1>
       <p className="mt-2 text-gray-600">Order ID: <b className="text-brand">{number}</b></p>
       {state?.total && <p className="text-gray-600">Total to pay: <b>{money(state.total)}</b> ({state.pay})</p>}
-      <p className="mt-3 text-sm text-gray-500">We will confirm your order by SMS. Save the order ID to track it.</p>
+      <p className="mt-3 text-sm text-gray-500">Order updates and delivery review requests will appear in the website message icon. You can track this order here without entering its ID.</p>
       <div className="mt-6 flex justify-center gap-3">
-        <Link to="/track" className="rounded-lg border-2 border-brand px-5 py-2 font-semibold text-brand">Track order</Link>
+        <Link to={`/track/${number}`} className="rounded-lg border-2 border-brand px-5 py-2 font-semibold text-brand">Track order</Link>
         <Link to="/shop" className="rounded-lg bg-cta px-5 py-2 font-semibold text-white">Continue shopping</Link>
       </div>
     </main>

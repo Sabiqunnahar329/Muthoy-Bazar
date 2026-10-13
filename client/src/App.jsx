@@ -49,7 +49,7 @@ export default function App() {
         <Route path="cart" element={<Navigate to="/checkout" replace />} />
         <Route path="order-success/:number" element={<OrderSuccess />} />
         <Route path="review/:token" element={<OrderReview />} />
-        <Route path="track" element={<TrackOrder />} />
+        <Route path="track/:number?" element={<TrackOrder />} />
         <Route path="account" element={<Account />} />
         <Route path="contact" element={<Contact />} />
         <Route path="messages" element={<Navigate to="/" replace />} />

@@ -45,7 +45,7 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 **Server**
 - REST API with JWT login, role checks, rate limiting on auth routes, helmet and CORS
 - Atomic stock deduction, server-side price calculation, phone validation, repeat-cancel "Risky" flag on orders
-- SMS helper (Greenweb), including delivery updates and post-delivery feedback links. Without `SMS_TOKEN`, messages are printed in the server console
+- Website message inbox notifications for order updates, delivery review requests, and customer support replies; phone account password resets may use SMS
 
 ## Run it locally
 
@@ -56,7 +56,7 @@ You need Node.js 18 or newer and MongoDB (local or Atlas).
 cd server
 cp .env.example .env        # then edit MONGO_URI, JWT_SECRET and the admin password
 npm install
-npm run seed                # adds 41 categories, 105 products and the admin account
+npm run seed                # adds the catalog and admin account, and safely migrates legacy category assignments
 npm run dev                 # http://localhost:5000
 
 # 2. Client (new terminal)
@@ -69,7 +69,7 @@ Admin login: the `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `server/.env`
 (default `admin@muthoybazar.com` / `ChangeMe123`). Change the password before going live.
 
 `npm run seed -- --fresh` wipes categories and products and loads the catalog again.
-To populate Bengali names on an existing catalog, deploy the updated server and run `npm run seed` once from `server` with its production `MONGO_URI`; this updates product-name translations without replacing products, stock, or categories. Do not use `--fresh` for this.
+To update an existing catalog, deploy the updated server and run `npm run seed` once from `server` with its production `MONGO_URI`. This moves seed products into Dry Fruits and peanut butter into Snacks, removes the old empty categories, and updates Bengali product-name translations without replacing products, stock, images, ratings, or reviews. Do not use `--fresh` for this.
 Deploying website code does not erase MongoDB orders, messages, product ratings or reviews. Keep using the same production `MONGO_URI` and database; never run `npm run seed -- --fresh` during a routine website update.
 
 ## Product pictures
@@ -105,6 +105,7 @@ On Render (Web Service), Railway, a VPS, etc.:
 
 - Set `CLIENT_URL` in `server/.env` to your site address, use a long random `JWT_SECRET`, and set `NODE_ENV=production`
   (this also hides the development reset code on the forgot-password page).
+- Order updates, delivery review requests, and support replies appear in the website message inbox; these notifications do not send SMS. Phone account password-reset codes continue to use SMS when `SMS_TOKEN` is configured.
 - If the API runs behind a reverse proxy, set `TRUST_PROXY=1`, otherwise IP blocking sees the proxy address instead of the visitor.
 - When Cloudinary is configured, newly uploaded product pictures are stored in the `muthoy-bazar/products` folder. Existing `/uploads/...` files are not migrated automatically; download/keep a copy before changing hosting if they are still available.
 - Password reset codes for email accounts are printed in the server console. Connect an email service in

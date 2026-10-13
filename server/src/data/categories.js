@@ -14,15 +14,13 @@ Beverages|Juices and flavoured drinks
 Soft Drinks|Carbonated soft drinks
 Mineral Water|Bottled drinking water
 Biscuits|Cream, glucose and digestive biscuits
-Snacks|Chips, chanachur and savoury snacks
+Snacks|Chips, chanachur, savoury snacks and spreads
 Noodles|Instant and dry noodles
 Breakfast Items|Cereals and breakfast essentials
 Honey|Pure and flavoured honey
 Dates|Premium and everyday dates
-Dry Fruits|Nuts and dried fruits
-Seeds|Chia and other superseeds
+Dry Fruits|Nuts, seeds and dried fruits
 Oats|Rolled and instant oats
-Peanut Butter|Smooth and crunchy peanut butter
 Jam|Fruit jams and spreads
 Jelly|Fruit jelly and preserves
 Pickles|Traditional mixed pickles

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Facebook, MessageCircle, RefreshCw, Send, X } from 'lucide-react';
 import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
 import { getSupportAccessCodes, saveSupportAccessCode } from '../lib/supportInbox.js';
+import { getOrderAccessCodes } from '../lib/orderAccess.js';
 
 const WHATSAPP = '8801612633433';
 const LINKS = {
@@ -21,7 +23,9 @@ export default function ChatWidget() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [unreadReplies, setUnreadReplies] = useState(0);
+  const [unreadOrderNotifications, setUnreadOrderNotifications] = useState(0);
   const [inboxMessages, setInboxMessages] = useState(null);
+  const [customerNotifications, setCustomerNotifications] = useState([]);
   const [inboxError, setInboxError] = useState('');
   const { t } = useLang();
   const { user } = useAuth();
@@ -31,9 +35,36 @@ export default function ChatWidget() {
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
 
   const refreshUnread = useCallback(async () => {
-    const { data } = await api.post('/support/inbox', { accessCodes: getSupportAccessCodes() });
-    setUnreadReplies(data.filter((message) => message.unreadReply).length);
+    const [{ data: messages }, { data: notifications }] = await Promise.all([
+      api.post('/support/inbox', { accessCodes: getSupportAccessCodes() }),
+      api.post('/orders/customer-notifications', { accessCodes: getOrderAccessCodes().map((entry) => entry.code) }),
+    ]);
+    setUnreadReplies(messages.filter((message) => message.unreadReply).length);
+    setUnreadOrderNotifications(notifications.filter((notification) => !notification.read).length);
   }, []);
+
+  const loadCustomerNotifications = useCallback(async (markRead = false) => {
+    try {
+      const accessCodes = getOrderAccessCodes().map((entry) => entry.code);
+      const { data } = await api.post('/orders/customer-notifications', { accessCodes });
+      setCustomerNotifications(data);
+      const unread = data.filter((notification) => !notification.read);
+      if (!markRead || !unread.length) {
+        setUnreadOrderNotifications(unread.length);
+        return;
+      }
+      const results = await Promise.allSettled(unread.map((notification) => api.patch(
+        `/orders/customer-notifications/${notification._id}/read`,
+        { accessCodes }
+      )));
+      const readIds = new Set(unread.filter((_, index) => results[index].status === 'fulfilled').map((notification) => notification._id));
+      setCustomerNotifications((current) => current.map((notification) => readIds.has(notification._id) ? { ...notification, read: true } : notification));
+      setUnreadOrderNotifications(unread.length - readIds.size);
+      if (results.some((result) => result.status === 'rejected')) setInboxError(t('inboxError'));
+    } catch (loadError) {
+      setInboxError(apiError(loadError, t('inboxError')));
+    }
+  }, [t]);
 
   const loadInbox = useCallback(async () => {
     setInboxError('');
@@ -52,10 +83,11 @@ export default function ChatWidget() {
       } else {
         setUnreadReplies(0);
       }
+      await loadCustomerNotifications(true);
     } catch (loadError) {
       setInboxError(apiError(loadError, t('inboxError')));
     }
-  }, [t]);
+  }, [loadCustomerNotifications, t]);
 
   useEffect(() => {
     const refresh = () => refreshUnread().catch((error) => console.error('Could not check support inbox:', error.message));
@@ -105,6 +137,7 @@ export default function ChatWidget() {
   };
 
   const conversations = inboxMessages || [];
+  const unreadCount = unreadReplies + unreadOrderNotifications;
 
   return (
     <div className="fixed bottom-5 right-5 z-40">
@@ -124,6 +157,20 @@ export default function ChatWidget() {
                 <button type="button" onClick={loadInbox} aria-label={t('inboxRefresh')} className="rounded p-1 text-brand hover:bg-white"><RefreshCw size={16} /></button>
               </div>
               {inboxError && <p role="alert" className="mb-3 rounded bg-red-50 p-2 text-xs text-red-700">{inboxError}</p>}
+              {customerNotifications.length > 0 && (
+                <section className="mb-4 space-y-2">
+                  <h3 className="text-sm font-bold text-gray-800">Order notifications</h3>
+                  {customerNotifications.map((notification) => (
+                    <article key={notification._id} className={`rounded-lg border bg-white p-3 ${notification.read ? '' : 'border-cta'}`}>
+                      <p className="text-sm font-semibold">{notification.title}</p>
+                      <p className="mt-1 text-xs text-gray-600">{notification.message}</p>
+                      {notification.link && <Link to={notification.link} onClick={() => setOpen(false)} className="mt-2 inline-block text-xs font-semibold text-brand underline">
+                        {notification.link.startsWith('/review/') ? 'Rate and review your items' : 'Track your order'}
+                      </Link>}
+                    </article>
+                  ))}
+                </section>
+              )}
               {inboxMessages === null ? <p className="text-sm text-gray-500">{t('inboxLoading')}</p> : conversations.length > 0 ? (
                 <>
                   <div className="space-y-3">
@@ -184,7 +231,7 @@ export default function ChatWidget() {
               <button type="button" onClick={openInbox} className={`${row} relative w-full justify-between text-left`}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"><MessageCircle size={18} /></span>
                 <span className="flex-1">{t('websiteMessage')}</span>
-                {unreadReplies > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{unreadReplies}</span>}
+                {unreadCount > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{unreadCount}</span>}
               </button>
               <a href={LINKS.messenger} target="_blank" rel="noreferrer" className={row}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white"><Facebook size={18} /></span>
@@ -201,9 +248,10 @@ export default function ChatWidget() {
       <button
         onClick={() => setOpen((value) => !value)}
         aria-label={t('chatTitle')} aria-expanded={open}
-        className="ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
       >
         {open ? <X size={26} /> : <MessageCircle size={26} />}
+        {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">{unreadCount}</span>}
       </button>
     </div>
   );

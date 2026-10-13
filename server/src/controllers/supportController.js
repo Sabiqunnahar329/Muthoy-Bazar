@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import Message from '../models/Message.js';
 import { asyncHandler, err, PHONE, escapeRegex } from '../utils/helpers.js';
 import { notify } from '../utils/notify.js';
-import { sendSms } from '../utils/sms.js';
 
 // Public contact form
 export const create = asyncHandler(async (req, res) => {
@@ -112,8 +111,7 @@ export const resetGuestInboxCode = asyncHandler(async (req, res) => {
   const accessCode = crypto.randomBytes(32).toString('hex');
   message.accessTokenHash = crypto.createHash('sha256').update(accessCode).digest('hex');
   await message.save();
-  if (message.phone) sendSms(message.phone, `Muthoy Bazar inbox access code: ${accessCode}`);
-  res.json({ accessCode, sentBySms: !!message.phone });
+  res.json({ accessCode });
 });
 
 export const list = asyncHandler(async (req, res) => {
@@ -144,7 +142,6 @@ export const reply = asyncHandler(async (req, res) => {
   m.reply = text; m.status = 'replied'; m.repliedAt = new Date(); m.replyReadAt = undefined;
   m.thread.push({ sender: 'admin', text, createdAt: m.repliedAt });
   await m.save();
-  if (m.phone) sendSms(m.phone, `Muthoy Bazar: ${text}`.slice(0, 300)); // email replies need an email service
   res.json(m);
 });
 
