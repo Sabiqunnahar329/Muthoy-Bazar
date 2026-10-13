@@ -82,6 +82,28 @@ export const markInboxRead = asyncHandler(async (req, res) => {
   res.json(inboxMessage(message));
 });
 
+export const customerReply = asyncHandler(async (req, res) => {
+  const text = String(req.body.message || '').trim();
+  if (text.length < 2) throw err(400, 'Write a message first');
+  if (text.length > 2000) throw err(400, 'Message must be 2000 characters or fewer');
+
+  const query = inboxQuery(req, req.body.accessCodes);
+  if (!query) throw err(404, 'Message not found');
+  const message = await Message.findOne({ _id: req.params.id, ...query }).select('+accessTokenHash');
+  if (!message) throw err(404, 'Message not found');
+
+  if (!message.thread.length) {
+    message.thread.push({ sender: 'customer', text: message.message, createdAt: message.createdAt });
+    if (message.reply) message.thread.push({ sender: 'admin', text: message.reply, createdAt: message.repliedAt });
+  }
+  message.thread.push({ sender: 'customer', text });
+  message.status = 'unread';
+  message.replyReadAt = undefined;
+  await message.save();
+  notify({ type: 'support', title: `New reply from ${message.name}`, message: text.slice(0, 80), link: '/admin/support-mailbox' });
+  res.json(inboxMessage(message));
+});
+
 export const resetGuestInboxCode = asyncHandler(async (req, res) => {
   const message = await Message.findById(req.params.id).select('+accessTokenHash');
   if (!message) throw err(404, 'Message not found');
@@ -99,7 +121,7 @@ export const list = asyncHandler(async (req, res) => {
   const q = {};
   if (['unread', 'read', 'replied'].includes(status)) q.status = status;
   if (['contact', 'support'].includes(source)) q.source = source;
-  if (search) { const rx = new RegExp(escapeRegex(search), 'i'); q.$or = [{ name: rx }, { subject: rx }, { message: rx }, { phone: rx }]; }
+  if (search) { const rx = new RegExp(escapeRegex(search), 'i'); q.$or = [{ name: rx }, { subject: rx }, { message: rx }, { phone: rx }, { 'thread.text': rx }]; }
   res.json(await Message.find(q).sort('-createdAt').limit(200));
 });
 

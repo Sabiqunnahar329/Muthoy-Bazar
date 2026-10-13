@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Facebook, MessageCircle, RefreshCw, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Facebook, MessageCircle, RefreshCw, Send, X } from 'lucide-react';
 import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../lib/api.js';
@@ -12,18 +11,16 @@ const LINKS = {
   messenger: 'https://m.me/MuthoyBazaar',
   whatsapp: `https://wa.me/${WHATSAPP}`,
 };
-const emptyMessage = { name: '', phone: '', email: '', message: '' };
+const emptyMessage = { name: '', phone: '', message: '' };
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [showInbox, setShowInbox] = useState(false);
   const [form, setForm] = useState(emptyMessage);
+  const [replyText, setReplyText] = useState('');
   const [error, setError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [accessCode, setAccessCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [unreadReplies, setUnreadReplies] = useState(0);
-  const [showInbox, setShowInbox] = useState(false);
   const [inboxMessages, setInboxMessages] = useState(null);
   const [inboxError, setInboxError] = useState('');
   const { t } = useLang();
@@ -49,7 +46,7 @@ export default function ChatWidget() {
           accessCodes: getSupportAccessCodes(),
         })));
         const readIds = new Set(unread.filter((_, index) => results[index].status === 'fulfilled').map((message) => message._id));
-        setInboxMessages((current) => current.map((message) => readIds.has(message._id) ? { ...message, unreadReply: false } : message));
+        setInboxMessages((current) => (current || data).map((message) => readIds.has(message._id) ? { ...message, unreadReply: false } : message));
         setUnreadReplies(unread.length - readIds.size);
         if (results.some((result) => result.status === 'rejected')) setInboxError(t('inboxError'));
       } else {
@@ -67,20 +64,38 @@ export default function ChatWidget() {
     return () => clearInterval(interval);
   }, [refreshUnread, user]);
 
+  useEffect(() => {
+    if (!open || !showInbox) return undefined;
+    const interval = setInterval(loadInbox, 15000);
+    return () => clearInterval(interval);
+  }, [loadInbox, open, showInbox]);
+
+  const openInbox = () => {
+    setShowInbox(true);
+    setError('');
+    if (inboxMessages === null) loadInbox();
+  };
+
   const sendMessage = async (event) => {
     event.preventDefault();
     setError('');
-    if (!form.phone.trim() && !form.email.trim()) {
-      setError(t('messageRequiredContact'));
-      return;
-    }
     setBusy(true);
     try {
-      const { data } = await api.post('/support', { ...form, source: 'support' });
-      saveSupportAccessCode(data.accessCode);
-      setAccessCode(data.accessCode);
-      setSent(true);
-      setForm(emptyMessage);
+      if (inboxMessages?.length) {
+        const latest = inboxMessages[0];
+        const { data } = await api.post(`/support/inbox/${latest._id}/reply`, {
+          accessCodes: getSupportAccessCodes(),
+          message: replyText,
+        });
+        setInboxMessages((current) => current.map((item) => item._id === data._id ? data : item));
+        setReplyText('');
+      } else {
+        const { data } = await api.post('/support', { ...form, source: 'support' });
+        saveSupportAccessCode(data.accessCode);
+        setForm(emptyMessage);
+        setInboxMessages(null);
+        await loadInbox();
+      }
       refreshUnread().catch((refreshError) => console.error('Could not refresh support inbox:', refreshError.message));
     } catch (sendError) {
       setError(apiError(sendError, t('messageSendError')));
@@ -89,16 +104,12 @@ export default function ChatWidget() {
     }
   };
 
-  const openInbox = () => {
-    setShowInbox(true);
-    setShowForm(false);
-    loadInbox();
-  };
+  const conversations = inboxMessages || [];
 
   return (
     <div className="fixed bottom-5 right-5 z-40">
       {open && (
-        <div role="dialog" aria-label={t('chatTitle')} className="mb-3 w-72 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+        <div role="dialog" aria-label={t('chatTitle')} className="mb-3 w-[min(22rem,calc(100vw-2.5rem))] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
           <div className="flex items-start justify-between bg-brand p-4 text-white">
             <div>
               <p className="font-bold">{t('chatTitle')}</p>
@@ -106,31 +117,57 @@ export default function ChatWidget() {
             </div>
             <button onClick={() => setOpen(false)} aria-label={t('close')} className="rounded p-1 hover:bg-white/10"><X size={18} /></button>
           </div>
-          {showForm ? (
+          {showInbox ? (
             <div className="max-h-[70vh] overflow-y-auto bg-surface p-3">
-              <button type="button" onClick={() => { setShowForm(false); setShowInbox(true); setSent(false); setError(''); }} className="mb-3 flex items-center gap-1 text-sm text-brand hover:underline">
-                <ArrowLeft size={16} />{t('messageBack')}
-              </button>
-              {sent ? (
-                <div role="status" className="space-y-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">
-                  <p>{t('messageSent')}</p>
-                  <button type="button" onClick={openInbox} className="font-semibold text-brand underline">{t('messageInbox')}</button>
-                  <details className="text-xs">
-                    <summary className="cursor-pointer">{t('inboxRecovery')}</summary>
-                    <p className="mt-2">{t('inboxCodeSaved')}</p>
-                    <code className="mt-1 block break-all rounded bg-white p-2">{accessCode}</code>
-                  </details>
-                </div>
+              <div className="mb-3 flex items-center justify-between">
+                <button type="button" onClick={() => setShowInbox(false)} className="text-sm font-medium text-brand hover:underline">{t('messageBack')}</button>
+                <button type="button" onClick={loadInbox} aria-label={t('inboxRefresh')} className="rounded p-1 text-brand hover:bg-white"><RefreshCw size={16} /></button>
+              </div>
+              {inboxError && <p role="alert" className="mb-3 rounded bg-red-50 p-2 text-xs text-red-700">{inboxError}</p>}
+              {inboxMessages === null ? <p className="text-sm text-gray-500">{t('inboxLoading')}</p> : conversations.length > 0 ? (
+                <>
+                  <div className="space-y-3">
+                    {conversations.map((message) => {
+                      const thread = message.thread || [
+                        { sender: 'customer', text: message.message, createdAt: message.createdAt },
+                        ...(message.reply ? [{ sender: 'admin', text: message.reply, createdAt: message.repliedAt }] : []),
+                      ];
+                      const waiting = thread[thread.length - 1]?.sender === 'customer';
+                      return (
+                        <article key={message._id} className="rounded-lg border bg-white p-3">
+                          <p className="mb-2 text-xs text-gray-500">{new Date(message.createdAt).toLocaleString()}</p>
+                          {message.subject && <p className="mb-2 text-sm font-semibold">{message.subject}</p>}
+                          <div className="space-y-2">
+                            {thread.map((entry, index) => (
+                              <div key={`${entry.sender}-${entry.createdAt || index}`} className={`rounded p-2 ${entry.sender === 'admin' ? 'border-l-2 border-brand bg-brand-light' : 'bg-surface'}`}>
+                                <p className={`mb-1 text-[11px] font-semibold ${entry.sender === 'admin' ? 'text-brand' : 'text-gray-600'}`}>
+                                  {entry.sender === 'admin' ? t('inboxReply') : t('inboxSent')} · {new Date(entry.createdAt).toLocaleString()}
+                                </p>
+                                <p className="whitespace-pre-wrap text-xs">{entry.text}</p>
+                              </div>
+                            ))}
+                          </div>
+                          {waiting && <p className="mt-2 text-xs text-gray-500">{t('inboxWaiting')}</p>}
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <form onSubmit={sendMessage} className="mt-3 space-y-2">
+                    <label htmlFor="chat-reply" className="sr-only">{t('messageText')}</label>
+                    <textarea id="chat-reply" value={replyText} onChange={(event) => setReplyText(event.target.value)} rows={2} minLength={2} maxLength={2000} required placeholder={t('messageText')} className={input} />
+                    {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+                    <button type="submit" disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-lg bg-cta py-2.5 text-sm font-bold text-white hover:bg-cta-dark disabled:opacity-60">
+                      <Send size={15} />{busy ? t('sendingMessage') : t('sendMessage')}
+                    </button>
+                  </form>
+                </>
               ) : (
                 <form onSubmit={sendMessage} className="space-y-3">
                   <label className="block text-sm font-medium">{t('messageName')}
                     <input value={form.name} onChange={update('name')} maxLength={80} required className={`${input} mt-1`} />
                   </label>
                   <label className="block text-sm font-medium">{t('messagePhone')}
-                    <input value={form.phone} onChange={update('phone')} inputMode="tel" className={`${input} mt-1`} />
-                  </label>
-                  <label className="block text-sm font-medium">{t('messageEmail')}
-                    <input type="email" value={form.email} onChange={update('email')} className={`${input} mt-1`} />
+                    <input value={form.phone} onChange={update('phone')} inputMode="tel" autoComplete="tel" pattern="01[3-9][0-9]{8}" maxLength={11} placeholder="01XXXXXXXXX" required className={`${input} mt-1`} />
                   </label>
                   <label className="block text-sm font-medium">{t('messageText')}
                     <textarea value={form.message} onChange={update('message')} rows={3} minLength={5} maxLength={2000} required className={`${input} mt-1`} />
@@ -141,47 +178,6 @@ export default function ChatWidget() {
                   </button>
                 </form>
               )}
-            </div>
-          ) : showInbox ? (
-            <div className="max-h-[70vh] overflow-y-auto bg-surface p-3">
-              <div className="mb-3 flex items-center justify-between">
-                <button type="button" onClick={() => setShowInbox(false)} className="flex items-center gap-1 text-sm text-brand hover:underline">
-                  <ArrowLeft size={16} />{t('messageBack')}
-                </button>
-                <button type="button" onClick={loadInbox} aria-label={t('inboxRefresh')} className="rounded p-1 text-brand hover:bg-white"><RefreshCw size={16} /></button>
-              </div>
-              <h2 className="mb-3 font-bold">{t('inboxTitle')}</h2>
-              {inboxError && <p role="alert" className="mb-3 rounded bg-red-50 p-2 text-xs text-red-700">{inboxError}</p>}
-              <button type="button" onClick={() => { setShowInbox(false); setShowForm(true); setSent(false); setError(''); }} className="mb-3 w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
-                {t('sendMessage')}
-              </button>
-              {inboxMessages === null ? <p className="text-sm text-gray-500">{t('inboxLoading')}</p> : inboxMessages.length === 0 ? (
-                <p className="rounded-lg bg-white p-3 text-sm text-gray-600">{t('inboxEmpty')}</p>
-              ) : (
-                <ul className="space-y-3">
-                  {inboxMessages.map((message) => (
-                    <li key={message._id} className="rounded-lg border bg-white p-3">
-                      <p className="text-xs text-gray-500">{new Date(message.createdAt).toLocaleString()}</p>
-                      {message.subject && <p className="mt-1 text-sm font-semibold">{message.subject}</p>}
-                      <div className="mt-2 space-y-2">
-                        {(message.thread || [
-                          { sender: 'customer', text: message.message, createdAt: message.createdAt },
-                          ...(message.reply ? [{ sender: 'admin', text: message.reply, createdAt: message.repliedAt }] : []),
-                        ]).map((entry, index) => (
-                          <div key={`${entry.sender}-${entry.createdAt || index}`} className={`rounded p-2 ${entry.sender === 'admin' ? 'border-l-2 border-brand bg-brand-light' : 'bg-surface'}`}>
-                            <p className={`mb-1 text-[11px] font-semibold ${entry.sender === 'admin' ? 'text-brand' : 'text-gray-600'}`}>
-                              {entry.sender === 'admin' ? t('inboxReply') : t('inboxSent')} · {new Date(entry.createdAt).toLocaleString()}
-                            </p>
-                            <p className="whitespace-pre-wrap text-xs">{entry.text}</p>
-                          </div>
-                        ))}
-                      </div>
-                      {!message.reply && <p className="mt-2 text-xs text-gray-500">{t('inboxWaiting')}</p>}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <Link to="/messages" onClick={() => setOpen(false)} className="mt-3 inline-block text-xs font-medium text-brand underline">{t('inboxFullPage')}</Link>
             </div>
           ) : (
             <div className="space-y-2 bg-surface p-3">
@@ -203,7 +199,7 @@ export default function ChatWidget() {
         </div>
       )}
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((value) => !value)}
         aria-label={t('chatTitle')} aria-expanded={open}
         className="ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
       >

@@ -9,7 +9,6 @@ import OrderReview from './pages/OrderReview.jsx';
 import TrackOrder from './pages/TrackOrder.jsx';
 import Account from './pages/Account.jsx';
 import Contact from './pages/Contact.jsx';
-import Messages from './pages/Messages.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
@@ -53,7 +52,7 @@ export default function App() {
         <Route path="track" element={<TrackOrder />} />
         <Route path="account" element={<Account />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="messages" element={<Messages />} />
+        <Route path="messages" element={<Navigate to="/" replace />} />
         <Route path="lp/:slug" element={<LandingPage />} />
       </Route>
       <Route path="login" element={<Login />} />

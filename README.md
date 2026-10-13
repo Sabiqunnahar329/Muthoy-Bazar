@@ -14,7 +14,7 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 - Product page, cart drawer with "You may also like", one-page checkout
   (delivery charge worked out automatically: 80 BDT when the city or address says Dhaka, 150 BDT elsewhere; Cash on delivery, bKash, Nagad, coupon codes)
 - Order tracking by order ID, optional customer login and registration, forgot password
-- Bangla / English toggle, chat widget (website message form, Facebook Messenger and WhatsApp), footer with map and policy pop-ups
+- Bangla / English toggle, chat widget (website chat with name/mobile number, ongoing customer/admin replies, Facebook Messenger and WhatsApp), footer with map and policy pop-ups
 - After an order is delivered, the customer receives an SMS feedback link to rate each purchased item and optionally write a review
 
 **Admin** (`/admin`, login required)
@@ -32,7 +32,7 @@ A grocery e-commerce site for Bangladesh built with the MERN stack
 - Fraud Checker and IP Block: look up a phone number or IP address, see its order history and risk level, and blacklist it. Blocked phones and IPs cannot place orders, register or send messages
 - Menu Builder: drag to reorder, edit, hide and add header and footer links. The storefront uses them once the menu has items
 - Notifications: alerts for new orders, low stock and customer messages with read and unread state, and unread badges in the sidebar
-- Support Mailbox and Contact Form Queries: messages from the website contact form, with reply (sent by SMS when the customer left a phone number); customers can read replies in their website inbox using their account or private access code
+- Support Mailbox and Contact Form Queries: website chat/contact messages with replies (sent by SMS when the customer left a phone number); customers can continue the conversation in the chat widget, which remembers guest inbox access in the same browser
 - Configurations: store name, currency, tax rate, phone, WhatsApp, email and address
 - Server Stats: database connection, uptime, memory and record counts
 - Website: homepage announcement and hero content editor

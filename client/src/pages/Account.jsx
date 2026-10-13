@@ -24,7 +24,6 @@ export default function Account() {
         <div><h1 className="text-2xl font-bold">{user.name}</h1><p className="text-gray-500">{user.email || user.phone}</p></div>
         <button onClick={logout} className="rounded-lg border px-4 py-2 hover:bg-gray-50">Logout</button>
       </div>
-      <Link to="/messages" className="mt-5 inline-flex items-center rounded-lg border border-brand px-4 py-2 font-semibold text-brand hover:bg-brand-light">My messages and replies</Link>
       <h2 className="mb-3 mt-8 text-lg font-bold">My orders</h2>
       {orderError && <p role="alert" className="mb-3 text-sm text-red-700">{orderError}</p>}
       {orders === null ? <p className="text-gray-500">Loading…</p> : orderError ? null : orders.length === 0 ? (

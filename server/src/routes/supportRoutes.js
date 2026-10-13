@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { create, inbox, markInboxRead, resetGuestInboxCode, list, markRead, reply, remove } from '../controllers/supportController.js';
+import { create, inbox, markInboxRead, customerReply, resetGuestInboxCode, list, markRead, reply, remove } from '../controllers/supportController.js';
 import { protect, optionalAuth, staff, can } from '../middleware/auth.js';
 import { blockCheck } from '../middleware/blocklist.js';
 
@@ -9,6 +9,7 @@ const r = Router();
 r.post('/', blockCheck, limiter, optionalAuth, create); // public contact form
 r.post('/inbox', optionalAuth, inbox);
 r.patch('/inbox/:id/read', optionalAuth, markInboxRead);
+r.post('/inbox/:id/reply', limiter, optionalAuth, customerReply);
 const admin = [protect, staff(), can('support')];
 r.get('/', ...admin, list);
 r.post('/:id/inbox-code', ...admin, resetGuestInboxCode);
