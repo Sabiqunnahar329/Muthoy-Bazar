@@ -45,8 +45,7 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
             <img src="/logo.png" alt="Muthoy Bazar" className="h-20 w-20 rounded-xl border border-gray-200 bg-white object-contain p-1" />
             <div>
               <p className="text-xl font-bold text-gray-900">Muthoy Bazar</p>
-              <p className="text-sm text-gray-700">সাধ্যের মধ্যে স্বস্তির বাজার</p>
-              {lang === 'en' && <p className="text-xs text-gray-500">Affordable and comfortable shopping</p>}
+              <p className="text-sm text-gray-700">{t('tagline')}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-gray-600">{t('about')}</p>
