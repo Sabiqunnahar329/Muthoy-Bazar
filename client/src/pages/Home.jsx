@@ -223,14 +223,6 @@ export default function Home() {
         </div>
       )}
 
-      <section className="mt-12">
-        <h2 className="mb-4 text-2xl font-bold">{t('customersSay')}</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[[t('review1'), 'Rahim U.', t('serviceHolder')], [t('review2'), 'Nusrat J.', t('teacher')], [t('review3'), 'Sabbir A.', t('businessOwner')]].map(([review, name, role]) => (
-            <figure key={name} className="rounded-xl border bg-white p-5"><blockquote className="mb-3">{review}</blockquote><figcaption className="text-sm"><b>{name}</b> <span className="text-gray-500">{role}</span></figcaption></figure>
-          ))}
-        </div>
-      </section>
     </main>
   );
 }

@@ -60,8 +60,6 @@ export default function ProductDetail() {
   if (!p) return <p className="py-20 text-center text-gray-500">Loading…</p>;
   const price = p.discountPrice || p.price;
   const out = p.stock < 1;
-  const reviewCount = p.numReviews ?? p.reviews?.length ?? 0;
-  const avgRating = Number(p.rating || 0);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
@@ -79,15 +77,6 @@ export default function ProductDetail() {
         <div>
           <p className="text-sm text-gray-500">{p.brand}</p>
           <h1 className="text-3xl font-bold">{productName(p, lang)}</h1>
-          <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
-            <div className="flex items-center gap-1 text-amber-500">
-              {Array.from({ length: 5 }, (_, index) => (
-                <Star key={index} size={16} fill={index < Math.round(avgRating) ? 'currentColor' : 'none'} strokeWidth={1.8} />
-              ))}
-            </div>
-            <span className="font-semibold text-gray-900">{avgRating.toFixed(1)}</span>
-            <span className="text-gray-500">({reviewCount} reviews)</span>
-          </div>
           <p className="mt-1 text-gray-500">{p.weight} {p.unit} · SKU {p.sku}</p>
           <p className="mt-4 text-3xl font-bold text-brand">{money(price)} {p.discountPrice > 0 && <s className="ml-2 text-lg font-normal text-gray-400">{money(p.price)}</s>}</p>
           <p className={`mt-2 text-sm font-medium ${out ? 'text-red-600' : p.stock < 10 ? 'text-amber-700' : 'text-green-700'}`}>{out ? 'Out of stock' : p.stock < 10 ? `Only ${p.stock} left` : 'In stock'}</p>

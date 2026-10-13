@@ -1,5 +1,4 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Star } from 'lucide-react';
 import { useCart } from '../context/CartContext.jsx';
 import { useLang } from '../context/LanguageContext.jsx';
 import { money, emoji, productName } from '../lib/helpers.js';
@@ -12,8 +11,6 @@ export default function ProductCard({ p }) {
   const save = p.discountPrice ? Math.round(((p.price - p.discountPrice) / p.price) * 100) : 0;
   const out = p.stock < 1;
   const badge = p.isBestSeller ? 'Best Selling' : p.isNewArrival ? 'New Arrival' : '';
-  const rating = Number(p.rating || 0);
-  const reviewCount = Number(p.numReviews || p.reviews?.length || 0);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
@@ -29,11 +26,6 @@ export default function ProductCard({ p }) {
       <div className="flex-1 p-3">
         <p className="text-xs text-gray-500">{p.brand}</p>
         <Link to={`/product/${p._id}`} className="line-clamp-2 font-semibold leading-snug hover:text-brand">{productName(p, lang)}</Link>
-        <div className="mt-1 flex items-center gap-1 text-xs text-amber-500">
-          <Star size={12} fill={rating > 0 ? 'currentColor' : 'none'} strokeWidth={1.8} />
-          <span className="font-medium text-gray-700">{rating ? rating.toFixed(1) : 'New'}</span>
-          <span className="text-gray-500">({reviewCount})</span>
-        </div>
         <p className="mt-0.5 text-xs text-gray-500">{p.weight} {p.unit}{p.stock > 0 && p.stock < 10 ? ` · only ${p.stock} left` : ''}</p>
         <p className="mt-1 text-lg font-bold text-brand">
           {money(price)} {p.discountPrice > 0 && <s className="ml-1 text-sm font-normal text-gray-400">{money(p.price)}</s>}
