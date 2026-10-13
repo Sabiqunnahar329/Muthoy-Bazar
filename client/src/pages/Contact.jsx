@@ -4,10 +4,12 @@ import { Phone, MapPin, Facebook } from 'lucide-react';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
 import { saveSupportAccessCode } from '../lib/supportInbox.js';
+import { useLang } from '../context/LanguageContext.jsx';
 
 const blank = { name: '', phone: '', email: '', subject: '', message: '' };
 
 export default function Contact() {
+  const { t } = useLang();
   const [f, setF] = useState(blank);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
@@ -55,8 +57,11 @@ export default function Contact() {
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         {done && <div role="status" className="space-y-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
           <p>{done}</p>
-          <p>Keep this private code to open your replies on another device:</p>
-          <code className="block break-all rounded bg-white p-2 text-xs">{accessCode}</code>
+          <details className="text-xs">
+            <summary className="cursor-pointer">{t('inboxRecovery')}</summary>
+            <p className="mt-2">{t('inboxCodeSaved')}</p>
+            <code className="mt-1 block break-all rounded bg-white p-2">{accessCode}</code>
+          </details>
           <Link to="/messages" className="inline-block font-semibold text-brand underline">View your messages</Link>
         </div>}
         <button disabled={busy} className="w-full rounded-lg bg-cta py-3 font-bold text-white hover:bg-cta-dark disabled:opacity-60">{busy ? 'Sending…' : 'Send message'}</button>

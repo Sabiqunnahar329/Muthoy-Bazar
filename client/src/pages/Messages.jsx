@@ -61,10 +61,13 @@ export default function Messages() {
       </div>
       <p className="mt-2 text-sm text-gray-600">{t('inboxHelp')}</p>
 
-      <form onSubmit={addCode} className="mt-5 flex flex-col gap-2 sm:flex-row">
-        <input value={accessCode} onChange={(event) => setAccessCode(event.target.value)} aria-label={t('inboxCodeLabel')} placeholder={t('inboxCodeLabel')} className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none" />
-        <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{t('inboxAddCode')}</button>
-      </form>
+      <details className="mt-5">
+        <summary className="cursor-pointer text-sm font-medium text-brand">{t('inboxRecovery')}</summary>
+        <form onSubmit={addCode} className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <input value={accessCode} onChange={(event) => setAccessCode(event.target.value)} aria-label={t('inboxCodeLabel')} placeholder={t('inboxCodeLabel')} className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none" />
+          <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{t('inboxAddCode')}</button>
+        </form>
+      </details>
 
       {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       {messages === null ? <p className="mt-6 text-gray-500">{t('inboxLoading')}</p> : messages.length === 0 ? (
