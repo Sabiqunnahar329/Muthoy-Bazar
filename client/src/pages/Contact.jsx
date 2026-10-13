@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Phone, MapPin, Facebook } from 'lucide-react';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
+import { saveSupportAccessCode } from '../lib/supportInbox.js';
 
 const blank = { name: '', phone: '', email: '', subject: '', message: '' };
 
@@ -9,6 +11,7 @@ export default function Contact() {
   const [f, setF] = useState(blank);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
+  const [accessCode, setAccessCode] = useState('');
   const [busy, setBusy] = useState(false);
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -18,7 +21,13 @@ export default function Contact() {
     if (!f.phone.trim() && !f.email.trim()) return setError('Enter a phone number or an email so we can reply');
     if (f.message.trim().length < 5) return setError('Write your message');
     setBusy(true);
-    try { const { data } = await api.post('/support', { ...f, source: 'contact' }); setDone(data.message); setF(blank); }
+    try {
+      const { data } = await api.post('/support', { ...f, source: 'contact' });
+      setDone(data.message);
+      setAccessCode(data.accessCode);
+      saveSupportAccessCode(data.accessCode);
+      setF(blank);
+    }
     catch (er) { setError(apiError(er)); } finally { setBusy(false); }
   };
   const input = 'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30';
@@ -44,7 +53,12 @@ export default function Contact() {
         <div><label htmlFor="c-subject" className="mb-1 block text-sm font-medium">Subject</label><input id="c-subject" value={f.subject} onChange={set('subject')} className={input} /></div>
         <div><label htmlFor="c-msg" className="mb-1 block text-sm font-medium">Message</label><textarea id="c-msg" rows={4} value={f.message} onChange={set('message')} className={input} /></div>
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-        {done && <p role="status" className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">{done}</p>}
+        {done && <div role="status" className="space-y-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">
+          <p>{done}</p>
+          <p>Keep this private code to open your replies on another device:</p>
+          <code className="block break-all rounded bg-white p-2 text-xs">{accessCode}</code>
+          <Link to="/messages" className="inline-block font-semibold text-brand underline">View your messages</Link>
+        </div>}
         <button disabled={busy} className="w-full rounded-lg bg-cta py-3 font-bold text-white hover:bg-cta-dark disabled:opacity-60">{busy ? 'Sending…' : 'Send message'}</button>
       </form>
     </main>

@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { ArrowLeft, Facebook, MessageCircle, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, Bell, Facebook, MessageCircle, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLang } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext.jsx';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
+import { getSupportAccessCodes, saveSupportAccessCode } from '../lib/supportInbox.js';
 
 const WHATSAPP = '8801612633433';
 const LINKS = {
@@ -17,12 +20,27 @@ export default function ChatWidget() {
   const [form, setForm] = useState(emptyMessage);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [unreadReplies, setUnreadReplies] = useState(0);
   const { t } = useLang();
+  const { user } = useAuth();
 
   const row = 'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 font-medium text-gray-800 transition hover:border-cta hover:bg-brand-light';
   const input = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30';
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
+
+  const refreshUnread = useCallback(async () => {
+    const { data } = await api.post('/support/inbox', { accessCodes: getSupportAccessCodes() });
+    setUnreadReplies(data.filter((message) => message.unreadReply).length);
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => refreshUnread().catch((error) => console.error('Could not check support inbox:', error.message));
+    refresh();
+    const interval = setInterval(refresh, 30000);
+    return () => clearInterval(interval);
+  }, [refreshUnread, user]);
 
   const sendMessage = async (event) => {
     event.preventDefault();
@@ -33,9 +51,12 @@ export default function ChatWidget() {
     }
     setBusy(true);
     try {
-      await api.post('/support', { ...form, source: 'support' });
+      const { data } = await api.post('/support', { ...form, source: 'support' });
+      saveSupportAccessCode(data.accessCode);
+      setAccessCode(data.accessCode);
       setSent(true);
       setForm(emptyMessage);
+      refreshUnread().catch((refreshError) => console.error('Could not refresh support inbox:', refreshError.message));
     } catch (sendError) {
       setError(apiError(sendError, t('messageSendError')));
     } finally {
@@ -60,7 +81,12 @@ export default function ChatWidget() {
                 <ArrowLeft size={16} />{t('messageBack')}
               </button>
               {sent ? (
-                <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{t('messageSent')}</p>
+                <div role="status" className="space-y-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+                  <p>{t('messageSent')}</p>
+                  <p className="font-medium">{t('inboxCodeSaved')}</p>
+                  <code className="block break-all rounded bg-white p-2 text-xs">{accessCode}</code>
+                  <Link to="/messages" onClick={() => setOpen(false)} className="inline-block font-semibold text-brand underline">{t('messageInbox')}</Link>
+                </div>
               ) : (
                 <form onSubmit={sendMessage} className="space-y-3">
                   <label className="block text-sm font-medium">{t('messageName')}
@@ -84,6 +110,10 @@ export default function ChatWidget() {
             </div>
           ) : (
             <div className="space-y-2 bg-surface p-3">
+              <Link to="/messages" onClick={() => setOpen(false)} className={`${row} justify-between`}>
+                <span className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-cta text-white"><Bell size={18} /></span>{t('messageInbox')}</span>
+                {unreadReplies > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{unreadReplies}</span>}
+              </Link>
               <button type="button" onClick={() => setShowForm(true)} className={`${row} w-full text-left`}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"><MessageCircle size={18} /></span>
                 {t('websiteMessage')}
@@ -103,9 +133,10 @@ export default function ChatWidget() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={t('chatTitle')} aria-expanded={open}
-        className="ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
       >
         {open ? <X size={26} /> : <MessageCircle size={26} />}
+        {!open && unreadReplies > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">{unreadReplies}</span>}
       </button>
     </div>
   );
