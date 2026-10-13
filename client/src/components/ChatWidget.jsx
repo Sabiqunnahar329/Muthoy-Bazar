@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Bell, Facebook, MessageCircle, RefreshCw, X } from 'lucide-react';
+import { ArrowLeft, Facebook, MessageCircle, RefreshCw, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -108,7 +108,7 @@ export default function ChatWidget() {
           </div>
           {showForm ? (
             <div className="max-h-[70vh] overflow-y-auto bg-surface p-3">
-              <button type="button" onClick={() => { setShowForm(false); setSent(false); setError(''); }} className="mb-3 flex items-center gap-1 text-sm text-brand hover:underline">
+              <button type="button" onClick={() => { setShowForm(false); setShowInbox(true); setSent(false); setError(''); }} className="mb-3 flex items-center gap-1 text-sm text-brand hover:underline">
                 <ArrowLeft size={16} />{t('messageBack')}
               </button>
               {sent ? (
@@ -152,6 +152,9 @@ export default function ChatWidget() {
               </div>
               <h2 className="mb-3 font-bold">{t('inboxTitle')}</h2>
               {inboxError && <p role="alert" className="mb-3 rounded bg-red-50 p-2 text-xs text-red-700">{inboxError}</p>}
+              <button type="button" onClick={() => { setShowInbox(false); setShowForm(true); setSent(false); setError(''); }} className="mb-3 w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+                {t('sendMessage')}
+              </button>
               {inboxMessages === null ? <p className="text-sm text-gray-500">{t('inboxLoading')}</p> : inboxMessages.length === 0 ? (
                 <p className="rounded-lg bg-white p-3 text-sm text-gray-600">{t('inboxEmpty')}</p>
               ) : (
@@ -182,13 +185,10 @@ export default function ChatWidget() {
             </div>
           ) : (
             <div className="space-y-2 bg-surface p-3">
-              <button type="button" onClick={openInbox} className={`${row} w-full justify-between text-left`}>
-                <span className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-cta text-white"><Bell size={18} /></span>{t('messageInbox')}</span>
-                {unreadReplies > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{unreadReplies}</span>}
-              </button>
-              <button type="button" onClick={() => setShowForm(true)} className={`${row} w-full text-left`}>
+              <button type="button" onClick={openInbox} className={`${row} relative w-full justify-between text-left`}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"><MessageCircle size={18} /></span>
-                {t('websiteMessage')}
+                <span className="flex-1">{t('websiteMessage')}</span>
+                {unreadReplies > 0 && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{unreadReplies}</span>}
               </button>
               <a href={LINKS.messenger} target="_blank" rel="noreferrer" className={row}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white"><Facebook size={18} /></span>
@@ -205,10 +205,9 @@ export default function ChatWidget() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={t('chatTitle')} aria-expanded={open}
-        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
+        className="ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-cta text-white shadow-lg transition hover:scale-105 hover:bg-cta-dark"
       >
         {open ? <X size={26} /> : <MessageCircle size={26} />}
-        {!open && unreadReplies > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">{unreadReplies}</span>}
       </button>
     </div>
   );
