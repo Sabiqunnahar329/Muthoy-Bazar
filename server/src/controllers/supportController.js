@@ -21,6 +21,7 @@ export const create = asyncHandler(async (req, res) => {
     subject: subject.trim().slice(0, 120),
     message: message.trim().slice(0, 2000),
     source: source === 'support' ? 'support' : 'contact',
+    thread: [{ sender: 'customer', text: message.trim().slice(0, 2000) }],
   });
   notify({ type: 'support', title: `New message from ${m.name}`, message: m.subject || m.message.slice(0, 80), link: '/admin/support-mailbox' });
   res.status(201).json({ message: 'Thank you! We have received your message.', accessCode });
@@ -34,7 +35,11 @@ const accessHash = (value) => (
 
 const inboxQuery = (req, accessCodes = []) => {
   const options = [];
-  if (req.user?._id) options.push({ user: req.user._id });
+  if (req.user?._id) {
+    options.push({ user: req.user._id });
+    if (req.user.phone) options.push({ phone: req.user.phone });
+    if (req.user.email) options.push({ email: req.user.email });
+  }
   const hashes = [...new Set((Array.isArray(accessCodes) ? accessCodes : []).slice(0, 50).map(accessHash).filter(Boolean))];
   if (hashes.length) options.push({ accessTokenHash: { $in: hashes } });
   return options.length ? { $or: options } : null;
@@ -46,6 +51,12 @@ const inboxMessage = (message) => ({
   subject: message.subject,
   message: message.message,
   reply: message.reply,
+  thread: message.thread?.length
+    ? message.thread
+    : [
+        { sender: 'customer', text: message.message, createdAt: message.createdAt },
+        ...(message.reply ? [{ sender: 'admin', text: message.reply, createdAt: message.repliedAt }] : []),
+      ],
   status: message.status,
   createdAt: message.createdAt,
   repliedAt: message.repliedAt,
@@ -71,6 +82,18 @@ export const markInboxRead = asyncHandler(async (req, res) => {
   res.json(inboxMessage(message));
 });
 
+export const resetGuestInboxCode = asyncHandler(async (req, res) => {
+  const message = await Message.findById(req.params.id).select('+accessTokenHash');
+  if (!message) throw err(404, 'Message not found');
+  if (message.user) throw err(409, 'This message is linked to a customer account');
+
+  const accessCode = crypto.randomBytes(32).toString('hex');
+  message.accessTokenHash = crypto.createHash('sha256').update(accessCode).digest('hex');
+  await message.save();
+  if (message.phone) sendSms(message.phone, `Muthoy Bazar inbox access code: ${accessCode}`);
+  res.json({ accessCode, sentBySms: !!message.phone });
+});
+
 export const list = asyncHandler(async (req, res) => {
   const { status, source, search } = req.query;
   const q = {};
@@ -92,7 +115,12 @@ export const reply = asyncHandler(async (req, res) => {
   if (text.length < 2) throw err(400, 'Write a reply first');
   const m = await Message.findById(req.params.id);
   if (!m) throw err(404, 'Message not found');
+  if (!m.thread.length) {
+    m.thread.push({ sender: 'customer', text: m.message, createdAt: m.createdAt });
+    if (m.reply) m.thread.push({ sender: 'admin', text: m.reply, createdAt: m.repliedAt });
+  }
   m.reply = text; m.status = 'replied'; m.repliedAt = new Date(); m.replyReadAt = undefined;
+  m.thread.push({ sender: 'admin', text, createdAt: m.repliedAt });
   await m.save();
   if (m.phone) sendSms(m.phone, `Muthoy Bazar: ${text}`.slice(0, 300)); // email replies need an email service
   res.json(m);

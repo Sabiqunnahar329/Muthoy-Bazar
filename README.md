@@ -70,6 +70,7 @@ Admin login: the `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `server/.env`
 
 `npm run seed -- --fresh` wipes categories and products and loads the catalog again.
 To populate Bengali names on an existing catalog, deploy the updated server and run `npm run seed` once from `server` with its production `MONGO_URI`; this updates product-name translations without replacing products, stock, or categories. Do not use `--fresh` for this.
+Deploying website code does not erase MongoDB orders, messages, product ratings or reviews. Keep using the same production `MONGO_URI` and database; never run `npm run seed -- --fresh` during a routine website update.
 
 ## Product pictures
 

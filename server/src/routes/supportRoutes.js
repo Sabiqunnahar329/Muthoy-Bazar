@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { create, inbox, markInboxRead, list, markRead, reply, remove } from '../controllers/supportController.js';
+import { create, inbox, markInboxRead, resetGuestInboxCode, list, markRead, reply, remove } from '../controllers/supportController.js';
 import { protect, optionalAuth, staff, can } from '../middleware/auth.js';
 import { blockCheck } from '../middleware/blocklist.js';
 
@@ -11,6 +11,7 @@ r.post('/inbox', optionalAuth, inbox);
 r.patch('/inbox/:id/read', optionalAuth, markInboxRead);
 const admin = [protect, staff(), can('support')];
 r.get('/', ...admin, list);
+r.post('/:id/inbox-code', ...admin, resetGuestInboxCode);
 r.patch('/:id/read', ...admin, markRead);
 r.post('/:id/reply', ...admin, reply);
 r.delete('/:id', ...admin, remove);

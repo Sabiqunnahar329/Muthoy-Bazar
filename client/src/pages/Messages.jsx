@@ -75,18 +75,20 @@ export default function Messages() {
             <li key={message._id} className="rounded-xl border bg-white p-5">
               <p className="text-xs text-gray-500">{new Date(message.createdAt).toLocaleString()}</p>
               {message.subject && <h2 className="mt-1 font-semibold">{message.subject}</h2>}
-              <div className="mt-3 rounded-lg bg-surface p-3">
-                <p className="mb-1 text-xs font-semibold text-gray-600">{t('inboxSent')}</p>
-                <p className="whitespace-pre-wrap text-sm">{message.message}</p>
+              <div className="mt-3 space-y-3">
+                {(message.thread || [
+                  { sender: 'customer', text: message.message, createdAt: message.createdAt },
+                  ...(message.reply ? [{ sender: 'admin', text: message.reply, createdAt: message.repliedAt }] : []),
+                ]).map((entry, index) => (
+                  <div key={`${entry.sender}-${entry.createdAt || index}`} className={`rounded-lg p-3 ${entry.sender === 'admin' ? 'border-l-4 border-brand bg-brand-light' : 'bg-surface'}`}>
+                    <p className={`mb-1 text-xs font-semibold ${entry.sender === 'admin' ? 'text-brand' : 'text-gray-600'}`}>
+                      {entry.sender === 'admin' ? t('inboxReply') : t('inboxSent')} · {new Date(entry.createdAt).toLocaleString()}
+                    </p>
+                    <p className="whitespace-pre-wrap text-sm">{entry.text}</p>
+                  </div>
+                ))}
               </div>
-              {message.reply ? (
-                <div className="mt-3 rounded-lg border-l-4 border-brand bg-brand-light p-3">
-                  <p className="mb-1 text-xs font-semibold text-brand">{t('inboxReply')} · {new Date(message.repliedAt).toLocaleString()}</p>
-                  <p className="whitespace-pre-wrap text-sm">{message.reply}</p>
-                </div>
-              ) : (
-                <p className="mt-3 text-sm text-gray-500">{t('inboxWaiting')}</p>
-              )}
+              {!message.reply && <p className="mt-3 text-sm text-gray-500">{t('inboxWaiting')}</p>}
             </li>
           ))}
         </ul>

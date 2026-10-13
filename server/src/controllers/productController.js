@@ -76,6 +76,20 @@ export const addReview = asyncHandler(async (req, res) => {
   res.status(201).json(product);
 });
 
+export const myReviews = asyncHandler(async (req, res) => {
+  const products = await Product.find({ 'reviews.user': req.user._id }).select('name nameBn reviews');
+  res.json(products.flatMap((product) => product.reviews
+    .filter((review) => review.user?.toString() === req.user._id.toString())
+    .map((review) => ({
+      product: product._id,
+      name: product.name,
+      nameBn: product.nameBn,
+      rating: review.rating,
+      review: review.review,
+      createdAt: review.createdAt,
+    }))));
+});
+
 const parse = (b) => ({
   name: b.name?.trim(),
   nameBn: b.nameBn?.trim() || '',

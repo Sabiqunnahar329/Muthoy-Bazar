@@ -14,6 +14,7 @@ export default function AdminMailbox({ source = '', title = 'Support Mailbox' })
   const [sel, setSel] = useState(null);
   const [reply, setReply] = useState('');
   const [msg, setMsg] = useState('');
+  const [inboxCode, setInboxCode] = useState('');
 
   const load = () => api.get('/support', { params: { source, status, search } }).then((r) => setList(r.data)).catch(() => setList([]));
   useEffect(() => { const id = setTimeout(load, 250); return () => clearTimeout(id); }, [source, status, search]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -24,6 +25,14 @@ export default function AdminMailbox({ source = '', title = 'Support Mailbox' })
     e.preventDefault(); setMsg('');
     try { const { data } = await api.post(`/support/${sel._id}/reply`, { reply }); setSel(data); setReply(''); setMsg(data.phone ? 'Reply saved and sent by SMS.' : 'Reply saved. This customer left an email only, so send it from your email app.'); load(); }
     catch (er) { setMsg(apiError(er)); }
+  };
+  const resetInboxCode = async () => {
+    setMsg(''); setInboxCode('');
+    try {
+      const { data } = await api.post(`/support/${sel._id}/inbox-code`);
+      setInboxCode(data.accessCode);
+      setMsg(data.sentBySms ? 'New inbox access code sent to the customer by SMS.' : 'Send this code to the customer privately so they can recover their old messages.');
+    } catch (er) { setMsg(apiError(er)); }
   };
   const remove = async () => { await api.delete(`/support/${sel._id}`).catch(() => {}); setSel(null); load(); };
 
@@ -48,14 +57,29 @@ export default function AdminMailbox({ source = '', title = 'Support Mailbox' })
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-2"><div><h2 className="text-lg font-bold">{sel.subject || 'Message'}</h2><p className="text-sm text-gray-600">{sel.name}{sel.phone && <> · <a href={`tel:${sel.phone}`} className="text-brand underline">{sel.phone}</a></>}{sel.email && <> · <a href={`mailto:${sel.email}`} className="text-brand underline">{sel.email}</a></>}</p><p className="text-xs text-gray-400">{fmtDate(sel.createdAt)}</p></div>
                 <button onClick={remove} aria-label="Delete message" className="rounded border p-1.5 text-red-600 hover:bg-red-50"><Trash2 size={15} /></button></div>
-              <p className="whitespace-pre-wrap rounded-lg bg-surface p-4 text-sm">{sel.message}</p>
-              {sel.reply && <div className="rounded-lg border-l-4 border-brand bg-brand-light p-4 text-sm"><p className="mb-1 text-xs font-semibold text-brand">Your reply · {fmtDate(sel.repliedAt)}</p><p className="whitespace-pre-wrap">{sel.reply}</p></div>}
+              <div className="space-y-3">
+                {(sel.thread?.length ? sel.thread : [
+                  { sender: 'customer', text: sel.message, createdAt: sel.createdAt },
+                  ...(sel.reply ? [{ sender: 'admin', text: sel.reply, createdAt: sel.repliedAt }] : []),
+                ]).map((entry, index) => (
+                  <div key={`${entry.sender}-${entry.createdAt || index}`} className={`rounded-lg p-4 text-sm ${entry.sender === 'admin' ? 'border-l-4 border-brand bg-brand-light' : 'bg-surface'}`}>
+                    <p className={`mb-1 text-xs font-semibold ${entry.sender === 'admin' ? 'text-brand' : 'text-gray-600'}`}>{entry.sender === 'admin' ? 'Your reply' : 'Customer message'} · {fmtDate(entry.createdAt)}</p>
+                    <p className="whitespace-pre-wrap">{entry.text}</p>
+                  </div>
+                ))}
+              </div>
               <form onSubmit={send} className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="reply-box">{sel.reply ? 'Send another reply' : 'Reply'}</label>
                 <textarea id="reply-box" rows={3} value={reply} onChange={(e) => setReply(e.target.value)} className={field} />
                 {msg && <p role="status" className="text-sm text-gray-700">{msg}</p>}
                 <button className={btnPrimary}><Send size={14} className="mr-1 inline" />Send reply</button>
               </form>
+              {!sel.user && (
+                <div className="space-y-2 border-t pt-3">
+                  <button type="button" onClick={resetInboxCode} className="rounded-lg border px-3 py-2 text-sm font-medium text-brand hover:bg-brand-light">Reset guest inbox access code</button>
+                  {inboxCode && <code className="block break-all rounded bg-gray-100 p-3 text-xs">{inboxCode}</code>}
+                </div>
+              )}
             </div>
           )}
         </Card>

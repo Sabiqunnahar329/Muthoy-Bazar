@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { list, brands, getOne, addReview, create, update, setStock, remove, imageAudit } from '../controllers/productController.js';
+import { list, brands, getOne, addReview, myReviews, create, update, setStock, remove, imageAudit } from '../controllers/productController.js';
 import { optionalAuth, protect, staff } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 
@@ -7,6 +7,7 @@ const r = Router();
 const manage = [protect, staff('admin', 'inventory_manager')];
 r.get('/', list);
 r.get('/brands', brands);
+r.get('/my/reviews', protect, myReviews);
 r.get('/admin/image-audit', ...manage, imageAudit);
 r.post('/:id/reviews', optionalAuth, addReview);
 r.get('/:id', getOne);
