@@ -3,6 +3,8 @@ import { createContext, useContext, useState } from 'react';
 const dict = {
   en: {
     tagline: 'Affordable and comfortable shopping',
+    storeAddress: 'Messrs. Abdul Latif Store, Shyambazar, Dhaka, Bangladesh',
+    googleMapsLabel: 'View on Google Maps',
     search: 'Search groceries or brands',
     login: 'Login', logout: 'Logout', cart: 'Cart', shoppingCart: 'Shopping Cart', close: 'Close',
     emptyCart: 'Your cart is empty', alsoLike: 'You May Also Like', add: 'Add', total: 'Total', checkout: 'CHECKOUT',
@@ -50,6 +52,8 @@ const dict = {
   },
   bn: {
     tagline: 'সাধ্যের মধ্যে স্বস্তির বাজার',
+    storeAddress: 'মেসার্স আব্দুল লতিফ স্টোর, শ্যামবাজার, ঢাকা, বাংলাদেশ',
+    googleMapsLabel: 'Google Maps-এ দেখুন',
     search: 'মুদি পণ্য বা ব্র্যান্ড খুঁজুন',
     login: 'লগইন', logout: 'লগআউট', cart: 'কার্ট', shoppingCart: 'শপিং কার্ট', close: 'বন্ধ করুন',
     emptyCart: 'আপনার কার্ট খালি', alsoLike: 'আপনার পছন্দ হতে পারে', add: 'যোগ করুন', total: 'মোট', checkout: 'চেকআউট',

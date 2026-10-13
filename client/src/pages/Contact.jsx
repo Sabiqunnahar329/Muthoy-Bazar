@@ -3,10 +3,12 @@ import { Phone, MapPin, Facebook } from 'lucide-react';
 import api from '../lib/api.js';
 import { apiError } from '../lib/helpers.js';
 import { saveSupportAccessCode } from '../lib/supportInbox.js';
+import { useLang } from '../context/LanguageContext.jsx';
 
 const blank = { name: '', phone: '', email: '', subject: '', message: '' };
 
 export default function Contact() {
+  const { t } = useLang();
   const [f, setF] = useState(blank);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
@@ -37,7 +39,7 @@ export default function Contact() {
         <ul className="mt-6 space-y-4">
           <li className="flex gap-3 rounded-xl border bg-white p-4"><Phone className="shrink-0 text-brand" /><span>WhatsApp and helpline: <a className="font-semibold text-brand" href="https://wa.me/8801612633433">+880 1612-633433</a></span></li>
           <li className="flex gap-3 rounded-xl border bg-white p-4"><Facebook className="shrink-0 text-brand" /><a className="font-semibold text-brand" href="https://www.facebook.com/MuthoyBazaar" target="_blank" rel="noreferrer">facebook.com/MuthoyBazaar</a></li>
-          <li className="flex gap-3 rounded-xl border bg-white p-4"><MapPin className="shrink-0 text-brand" /><a className="font-semibold text-brand hover:underline" href="https://www.google.com/maps?q=23.7036629,90.4141469" target="_blank" rel="noreferrer">মেসার্স আব্দুল লতিফ স্টোর, শ্যামবাজার, ঢাকা, বাংলাদেশ · Google Maps-এ দেখুন</a></li>
+          <li className="flex gap-3 rounded-xl border bg-white p-4"><MapPin className="shrink-0 text-brand" /><a className="font-semibold text-brand hover:underline" href="https://www.google.com/maps?q=23.7036629,90.4141469" target="_blank" rel="noreferrer">{t('storeAddress')} · {t('googleMapsLabel')}</a></li>
         </ul>
       </div>
       <form onSubmit={submit} noValidate className="space-y-3 rounded-2xl border bg-white p-6">

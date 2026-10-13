@@ -7,9 +7,8 @@ import { localizedLabel } from '../lib/helpers.js';
 
 const FACEBOOK = 'https://www.facebook.com/MuthoyBazaar';
 const DEVELOPER_FACEBOOK = 'https://www.facebook.com/share/19zN7CPnZq/';
-const ADDRESS = 'মেসার্স আব্দুল লতিফ স্টোর, শ্যামবাজার, ঢাকা, বাংলাদেশ';
 const MAP_URL = 'https://www.google.com/maps/place/%E0%A6%AE%E0%A7%87%E0%A6%B8%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B8+%E0%A6%86%E0%A6%AC%E0%A7%8D%E0%A6%A6%E0%A7%81%E0%A6%B2+%E0%A6%B2%E0%A6%A4%E0%A6%BF%E0%A6%AB+%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A7%8B%E0%A6%B0/@23.7037076,90.4140163,50m/data=!3m1!1e3!4m6!3m5!1s0x3755b9848728638b:0x268ed1d23b258e63!8m2!3d23.7036629!4d90.4141469!16s%2Fg%2F11xt4b9q_2';
-const MAP_SRC = 'https://maps.google.com/maps?hl=bn&q=23.7036629%2C90.4141469&z=18&output=embed';
+const MAP_SRC = (lang) => `https://maps.google.com/maps?hl=${lang}&q=23.7036629%2C90.4141469&z=18&output=embed`;
 
 // Edit the policy wording with your own terms before launch.
 const POLICIES = {
@@ -91,14 +90,14 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
           <ul className="space-y-3 text-sm text-gray-700">
             <li className={card}><Phone size={16} className="mt-0.5 shrink-0 text-[#8c6747]" /><span>WhatsApp: <a className="font-medium text-gray-900 hover:text-[#8c6747] hover:underline" href="https://wa.me/8801612633433">+880 1612-633433</a></span></li>
             <li className={card}><Facebook size={16} className="mt-0.5 shrink-0 text-[#8c6747]" /><span>Facebook: <a className="font-medium text-gray-900 hover:text-[#8c6747] hover:underline" href={FACEBOOK} target="_blank" rel="noreferrer">Muthoy Bazar</a></span></li>
-            <li className={card}><MapPin size={16} className="mt-0.5 shrink-0 text-[#8c6747]" /><a className="font-medium text-gray-900 hover:text-[#8c6747] hover:underline" href={MAP_URL} target="_blank" rel="noreferrer">{ADDRESS} · Google Maps-এ দেখুন</a></li>
+            <li className={card}><MapPin size={16} className="mt-0.5 shrink-0 text-[#8c6747]" /><a className="font-medium text-gray-900 hover:text-[#8c6747] hover:underline" href={MAP_URL} target="_blank" rel="noreferrer">{t('storeAddress')} · {t('googleMapsLabel')}</a></li>
           </ul>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 pb-8">
         <iframe
-          title="Muthoy Bazar location" src={MAP_SRC} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
+          title="Muthoy Bazar location" src={MAP_SRC(lang)} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
           className="h-64 w-full rounded-xl border border-gray-200 sm:h-72"
         />
         <a href={MAP_URL} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-brand hover:underline">{t('openMap')}</a>

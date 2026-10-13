@@ -35,13 +35,14 @@ const SLIDES = [
   { title: 'Pure honey and premium dates', text: 'Natural sweetness from trusted sources, packed fresh.', cta: 'Shop honey', to: '/shop?category=Honey', bg: 'from-amber-800 to-amber-500', img: '/banners/slide-3.jpg' },
 ];
 
+const DEFAULT_HERO_TITLE = 'সাধ্যের মধ্যে স্বস্তির বাজার';
 const FEATURED = ['Rice', 'Cooking Oil', 'Ghee', 'Spices', 'Tea', 'Coffee', 'Honey', 'Dates', 'Dry Fruits', 'Noodles'];
 
 function HeroSlider({ settings, t }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   const slides = [
-    { ...SLIDES[0], title: settings?.heroTitle || t('tagline'), text: settings?.heroText || t('slide1Text'), cta: settings?.heroCta || t('slide1Cta'), to: settings?.heroLink || SLIDES[0].to, img: settings?.heroImage || SLIDES[0].img },
+    { ...SLIDES[0], title: !settings?.heroTitle || settings.heroTitle === DEFAULT_HERO_TITLE ? t('tagline') : settings.heroTitle, text: settings?.heroText || t('slide1Text'), cta: settings?.heroCta || t('slide1Cta'), to: settings?.heroLink || SLIDES[0].to, img: settings?.heroImage || SLIDES[0].img },
     { ...SLIDES[1], title: t('slide2Title'), text: t('slide2Text'), cta: t('slide2Cta') },
     { ...SLIDES[2], title: t('slide3Title'), text: t('slide3Text'), cta: t('slide3Cta') },
   ];
