@@ -8,7 +8,8 @@ export const create = asyncHandler(async (req, res) => {
   const { name, phone = '', email = '', subject = '', message, source } = req.body;
   if (!name?.trim()) throw err(400, 'Enter your name');
   if (!PHONE.test(phone) && !/^\S+@\S+\.\S+$/.test(email)) throw err(400, 'Enter a valid phone number or email so we can reply');
-  if (!message || message.trim().length < 5) throw err(400, 'Write your message (at least 5 characters)');
+  if (typeof message !== 'string' || !message.trim()) throw err(400, 'Write your message');
+  const messageText = message.trim().slice(0, 2000);
   const accessCode = crypto.randomBytes(32).toString('hex');
   const accessTokenHash = crypto.createHash('sha256').update(accessCode).digest('hex');
   const m = await Message.create({
@@ -18,9 +19,9 @@ export const create = asyncHandler(async (req, res) => {
     phone: phone.trim(),
     email: email.trim(),
     subject: subject.trim().slice(0, 120),
-    message: message.trim().slice(0, 2000),
+    message: messageText,
     source: source === 'support' ? 'support' : 'contact',
-    thread: [{ sender: 'customer', text: message.trim().slice(0, 2000) }],
+    thread: [{ sender: 'customer', text: messageText }],
   });
   notify({ type: 'support', title: `New message from ${m.name}`, message: m.subject || m.message.slice(0, 80), link: '/admin/support-mailbox' });
   res.status(201).json({ message: 'Thank you! We have received your message.', accessCode });
@@ -83,7 +84,7 @@ export const markInboxRead = asyncHandler(async (req, res) => {
 
 export const customerReply = asyncHandler(async (req, res) => {
   const text = String(req.body.message || '').trim();
-  if (text.length < 2) throw err(400, 'Write a message first');
+  if (!text) throw err(400, 'Write a message first');
   if (text.length > 2000) throw err(400, 'Message must be 2000 characters or fewer');
 
   const query = inboxQuery(req, req.body.accessCodes);

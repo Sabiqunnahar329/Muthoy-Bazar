@@ -201,7 +201,7 @@ export default function ChatWidget() {
                   </div>
                   <form onSubmit={sendMessage} className="mt-3 space-y-2">
                     <label htmlFor="chat-reply" className="sr-only">{t('messageText')}</label>
-                    <textarea id="chat-reply" value={replyText} onChange={(event) => setReplyText(event.target.value)} rows={2} minLength={2} maxLength={2000} required placeholder={t('messageText')} className={input} />
+                    <textarea id="chat-reply" value={replyText} onChange={(event) => setReplyText(event.target.value)} rows={2} maxLength={2000} required placeholder={t('messageText')} className={input} />
                     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
                     <button type="submit" disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-lg bg-cta py-2.5 text-sm font-bold text-white hover:bg-cta-dark disabled:opacity-60">
                       <Send size={15} />{busy ? t('sendingMessage') : t('sendMessage')}
@@ -217,7 +217,7 @@ export default function ChatWidget() {
                     <input value={form.phone} onChange={update('phone')} inputMode="tel" autoComplete="tel" pattern="01[3-9][0-9]{8}" maxLength={11} placeholder="01XXXXXXXXX" required className={`${input} mt-1`} />
                   </label>
                   <label className="block text-sm font-medium">{t('messageText')}
-                    <textarea value={form.message} onChange={update('message')} rows={3} minLength={5} maxLength={2000} required className={`${input} mt-1`} />
+                    <textarea value={form.message} onChange={update('message')} rows={3} maxLength={2000} required className={`${input} mt-1`} />
                   </label>
                   {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
                   <button type="submit" disabled={busy} className="w-full rounded-lg bg-cta py-2.5 text-sm font-bold text-white hover:bg-cta-dark disabled:opacity-60">

@@ -118,22 +118,20 @@ export default function CategoryNav({ items = DEFAULT_NAV }) {
 
       {/* "All" dropdown: every primary category with its sub-categories */}
       {allOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 border-b border-gray-200 bg-white shadow-xl">
-          <div className="mx-auto max-h-[70vh] max-w-7xl overflow-y-auto px-4 py-5">
-            <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-              {items.map((it) => (
-                <div key={it.label}>
-                  {it.to
-                    ? <Link to={it.to} onClick={closeAll} className="font-bold text-gray-900 hover:text-[#8c6747]">{localizedLabel(it.label, lang)}</Link>
-                    : <p className="font-bold text-gray-900">{localizedLabel(it.label, lang)}</p>}
-                  {it.children?.length > 0 && (
-                    <ul className="mt-1 space-y-0.5">
+        <div className="absolute left-0 top-full z-50 max-h-[70vh] w-72 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-b-lg border border-gray-200 bg-white shadow-xl">
+          <div className="space-y-4 px-4 py-4">
+            {items.map((it) => (
+              <div key={it.label}>
+                {it.to
+                  ? <Link to={it.to} onClick={closeAll} className="font-bold text-gray-900 hover:text-[#8c6747]">{localizedLabel(it.label, lang)}</Link>
+                  : <p className="font-bold text-gray-900">{localizedLabel(it.label, lang)}</p>}
+                {it.children?.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
                     {it.children.map((c) => <li key={c.label}><Link to={c.to} onClick={closeAll} className="text-sm text-gray-600 hover:text-[#8c6747]">{localizedLabel(c.label, lang)}</Link></li>)}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </ul>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

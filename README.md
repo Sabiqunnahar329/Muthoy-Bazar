@@ -91,6 +91,7 @@ On Render (Web Service), Railway, a VPS, etc.:
 - Start command: `npm start`
 - Environment variables: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your site address), `NODE_ENV=production`, `TRUST_PROXY=1`
 - Leave `REACT_APP_API_URL` empty.
+- Render's free service can sleep when idle and may show its own "Application Loading" page while waking. API read requests retry transient startup failures for about a minute; avoiding Render's wake-up page entirely requires an always-on service or hosting the frontend separately.
 - For persistent product images on Render's free plan, create a Cloudinary account and add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` to the service environment. New admin uploads then go to Cloudinary. Production uploads are rejected until Cloudinary is configured, rather than saving files that would disappear on redeploy.
 
 ### Option B: frontend on Vercel/Netlify, API on Render

@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
 
 // A free Render server goes to sleep and can need up to a minute to wake up.
 // Read requests (GET) that fail because the server is not ready are tried again a few times.
-const RETRY_DELAYS = [2000, 5000, 10000];
+const RETRY_DELAYS = [2000, 5000, 10000, 15000, 20000];
 const notReady = (error) => !error.response || [502, 503, 504].includes(error.response.status);
 
 api.interceptors.response.use(undefined, async (error) => {

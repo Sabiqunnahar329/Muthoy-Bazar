@@ -22,6 +22,7 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
   const { t, lang } = useLang();
   const menu = useMenu();
   const quick = menu?.footer?.length ? menu.footer : null;
+  const developerName = lang === 'bn' ? 'সাবিকুন্নাহার' : 'Sabiqunnahar';
   const [policy, setPolicy] = useState(null);
 
   useEffect(() => {
@@ -107,8 +108,8 @@ export default function Footer({ categories = ['Baby Food', 'Beverages', 'Biscui
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-sm text-gray-600 sm:flex-row">
           <p>© {new Date().getFullYear()} Muthoy Bazar. {t('rights')}</p>
           <p className="flex items-center gap-2">
-            <a href={DEVELOPER_FACEBOOK} target="_blank" rel="noopener noreferrer" aria-label="Sabiqunnahar on Facebook" className="text-gray-600 transition hover:text-[#8c6747]"><Facebook size={16} /></a>
-            <span>{t('developedBy')} <span className="font-semibold text-gray-900">Sabiqunnahar</span></span>
+            <a href={DEVELOPER_FACEBOOK} target="_blank" rel="noopener noreferrer" aria-label={`${developerName} on Facebook`} className="text-gray-600 transition hover:text-[#8c6747]"><Facebook size={16} /></a>
+            <span>{t('developedBy')} <span className="font-semibold text-gray-900">{developerName}</span></span>
           </p>
         </div>
       </div>

@@ -19,7 +19,7 @@ export default function Contact() {
     e.preventDefault(); setError(''); setDone('');
     if (!f.name.trim()) return setError('Enter your name');
     if (!f.phone.trim() && !f.email.trim()) return setError('Enter a phone number or an email so we can reply');
-    if (f.message.trim().length < 5) return setError('Write your message');
+    if (!f.message.trim()) return setError('Write your message');
     setBusy(true);
     try {
       const { data } = await api.post('/support', { ...f, source: 'contact' });
