@@ -81,7 +81,17 @@ Deploying website code does not erase MongoDB orders, messages, product ratings 
 
 ## Going live
 
-### Option A: one server for everything (easiest, no CORS or proxy problems)
+### Option A: frontend on Vercel, API on Render (recommended for the free Render plan)
+
+The static React site is served by Vercel, so opening the website does not wait for Render's server to wake up. Render remains the API and may still take a little time to return products after being idle.
+
+- Import this repository into Vercel and set the project root to `client`.
+- Build command: `npm run build`; output directory: `build`.
+- `client/vercel.json` is configured to proxy `/api` and `/uploads` to `https://muthoy-bazar.onrender.com`. If your Render API uses a different domain, update both destinations there.
+- Leave `REACT_APP_API_URL` empty.
+- After deployment, open the Vercel website URL; the Render URL is the API and may show Render's "Application Loading" page when opened directly.
+
+### Option B: one server for everything (same domain, but Render free services sleep)
 
 The Express server also serves the React build, so the website and the API share one domain.
 On Render (Web Service), Railway, a VPS, etc.:
@@ -91,13 +101,11 @@ On Render (Web Service), Railway, a VPS, etc.:
 - Start command: `npm start`
 - Environment variables: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your site address), `NODE_ENV=production`, `TRUST_PROXY=1`
 - Leave `REACT_APP_API_URL` empty.
-- Render's free service can sleep when idle and may show its own "Application Loading" page while waking. API read requests retry transient startup failures for about a minute; avoiding Render's wake-up page entirely requires an always-on service or hosting the frontend separately.
+- Render's free service can sleep when idle and may show its own "Application Loading" page while waking. API read requests retry transient startup failures for about a minute. To avoid that page when opening the website, use Option A or an always-on server.
 - For persistent product images on Render's free plan, create a Cloudinary account and add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` to the service environment. New admin uploads then go to Cloudinary. Production uploads are rejected until Cloudinary is configured, rather than saving files that would disappear on redeploy.
 
-### Option B: frontend on Vercel/Netlify, API on Render
+### Alternative: frontend on Netlify, API on Render
 
-- Vercel: set the project root to `client`. Build command `npm run build`, output directory `build`.
-  Edit `client/vercel.json` and replace `YOUR-API-DOMAIN` with your API address. Leave `REACT_APP_API_URL` empty.
 - Netlify: base directory `client`, build `npm run build`, publish `client/build`. `public/_redirects` handles page refreshes.
   Add a redirect for `/api/*` and `/uploads/*` to your API, or set `REACT_APP_API_URL=https://your-api/api`.
 - The production build disables the ESLint webpack plugin (`client/.env.production` sets `DISABLE_ESLINT_PLUGIN=true`); local development lint remains enabled.
